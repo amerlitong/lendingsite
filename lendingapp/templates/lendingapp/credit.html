@@ -1,4 +1,5 @@
 {% extends "lendingapp/base.html" %}
+{% load extras %}
 {% block title %}
 	<title>Credits</title>
 {% endblock %}
@@ -18,7 +19,7 @@
 				<tr>
 					<td>{{ credit.name }}</td>
 					<td>{{ credit.amount }}</td>
-					<td>{{ credit.interest }}</td>
+					<td>{{ credit.interest|percent }}</td>
 					<td>{{ credit.dt }}</td>
 					<td>{{ credit.remarks }}</td>
 				</tr>

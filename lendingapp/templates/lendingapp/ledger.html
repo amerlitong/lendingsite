@@ -3,22 +3,26 @@
 	<title>Ledger</title>
 {% endblock %}	
 {% block content %}
-	<table>
-		<tr>
-			<th>AMOUNT</th>
-			<th>DATE</th>
-			<th>CATEGORY</th>
-			<th>BANK</th>
-			<th>REMARKS</th>
-		</tr>
-		{% for ledger in ledgers %}
+	<table class="table table-responsive table-striped">
+		<thead>
 			<tr>
-				<td>{{ ledger.amount }}</td>
-				<td>{{ ledger.dt }}</td>
-				<td>{{ ledger.category }}</td>
-				<td>{{ ledger.bank }}</td>
-				<td>{{ ledger.remarks }}</td>
+				<th>AMOUNT</th>
+				<th>DATE</th>
+				<th>CATEGORY</th>
+				<th>BANK</th>
+				<th>REMARKS</th>
 			</tr>
-		{% endfor %}
+		</thead>
+		<tbody>
+			{% for ledger in ledgers %}
+				<tr>
+					<td>{{ ledger.amount }}</td>
+					<td>{{ ledger.dt }}</td>
+					<td>{{ ledger.category }}</td>
+					<td>{{ ledger.bank }}</td>
+					<td>{{ ledger.remarks }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
 	</table>
 {% endblock %}

@@ -3,22 +3,26 @@
 	<title>Payments</title>
 {% endblock %}
 {% block content %}
-	<table>
-		<tr>
-			<th>NAME</th>
-			<th>AMOUNT</th>
-			<th>INTEREST</th>
-			<th>DATE</th>
-			<th>REMARKS</th>
-		</tr>
-		{% for payment in payments %}
+	<table class="table table-responsive table-striped">
+		<thead>
 			<tr>
-				<td>{{ payment.name }}</td>
-				<td>{{ payment.amount }}</td>
-				<td>{{ payment.interest }}</td>
-				<td>{{ payment.dt }}</td>
-				<td>{{ payment.remarks }}</td>
+				<th>NAME</th>
+				<th>AMOUNT</th>
+				<th>INTEREST</th>
+				<th>DATE</th>
+				<th>REMARKS</th>
 			</tr>
-		{% endfor %}
+		</thead>
+		<tbody>
+			{% for payment in payments %}
+				<tr>
+					<td>{{ payment.name }}</td>
+					<td>{{ payment.amount }}</td>
+					<td>{{ payment.interest }}</td>
+					<td>{{ payment.dt }}</td>
+					<td>{{ payment.remarks }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
 	</table>
 {% endblock %}

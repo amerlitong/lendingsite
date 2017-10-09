@@ -1,0 +1,13 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	{% block title %}
+		<title>Document</title>
+	{% endblock %}
+</head>
+<a href="{% url 'index'  %}">Home</a>
+<a href="{% url 'client'  %}">Clients</a>
+<body>
+	{% block content %}{% endblock %}
+</body>
+</html>

@@ -47,7 +47,7 @@ class Credit(CommonInfo):
 
 	def save(self,*args, **kwargs):
 		ledger = Ledger()
-		ledger.category = 'cre'
+		ledger.category = 'Credit'
 		ledger.amount = self.amount
 		ledger.interest = 0.0
 		ledger.remarks = self.client_fk.name
@@ -69,7 +69,7 @@ class Payment(CommonInfo):
 
 	def save(self,*args, **kwargs):
 		ledger = Ledger()
-		ledger.category = 'pay'
+		ledger.category = 'Payment'
 		ledger.amount = self.amount + self.interest
 		ledger.interest = 0.0
 		ledger.remarks = self.credit_fk.client_fk.name
@@ -79,12 +79,12 @@ class Payment(CommonInfo):
 
 class Ledger(CommonInfo):
 	cats = [
-		('pay','Payment'),
-		('cre','Credit'),
-		('rem','Remit'),
-		('pay','Payment'),
-		('min','Misc In'),
-		('mout','Misc Out')
+		('Payment','Payment'),
+		('Credit','Credit'),
+		('Remit','Remit'),
+		('Payment','Payment'),
+		('Misc In','Misc In'),
+		('Misc Out','Misc Out')
 	]
 	category = models.CharField(max_length=10,choices=cats)
 	bank = models.CharField(max_length=10,choices=[('bdo','BDO'),('bpi','BPI')],blank=True)

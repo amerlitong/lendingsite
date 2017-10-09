@@ -2,20 +2,20 @@ from django.shortcuts import render
 from .models import Client, Credit, Payment, Ledger
 
 def index(request):
-	return render(request,'index.html')
+	return render(request,'lendingapp/index.html')
 
 def client(request):
 	clients = Client.objects.all()
-	return render(request,'client.html',{'clients':clients})
+	return render(request,'lendingapp/client.html',{'clients':clients})
 
 def credit(request,client_id):
 	credits = Credit.objects.filter(client_fk=client_id)
-	return render(request,'credit.html',{'credits':credits})
+	return render(request,'lendingapp/credit.html',{'credits':credits})
 
-def payment(request):
-	payments = Payment.objects.all()
-	return render(request,'client.html',{'payments':payments})
+def payment(request,client_id):
+	payments = Payment.objects.filter(credit_fk__client_fk_id=client_id)
+	return render(request,'lendingapp/payment.html',{'payments':payments})
 
 def ledger(request):
-	ledger = Ledger.objects.all()
-	return render(request,'client.html',{'ledger':ledger})
+	ledgers = Ledger.objects.all()
+	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers})

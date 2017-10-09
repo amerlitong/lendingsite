@@ -1,0 +1,24 @@
+{% extends "lendingapp/base.html" %}
+{% block title %}
+	<title>Payments</title>
+{% endblock %}
+{% block content %}
+	<table>
+		<tr>
+			<th>NAME</th>
+			<th>AMOUNT</th>
+			<th>INTEREST</th>
+			<th>DATE</th>
+			<th>REMARKS</th>
+		</tr>
+		{% for payment in payments %}
+			<tr>
+				<td>{{ payment.name }}</td>
+				<td>{{ payment.amount }}</td>
+				<td>{{ payment.interest }}</td>
+				<td>{{ payment.dt }}</td>
+				<td>{{ payment.remarks }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

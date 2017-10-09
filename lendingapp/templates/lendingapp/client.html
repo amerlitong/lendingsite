@@ -1,0 +1,28 @@
+{% extends "lendingapp/base.html" %}
+{% block title %}
+	<title>Clients</title>
+{% endblock %}
+{% block content %}
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>NAME</th>
+			<th>ADDRESS</th>
+			<th>MOBILE</th>
+			<th>REMARKS</th>
+			<th>CREDITS</th>
+			<th>PAYMENTS</th>
+		</tr>
+		{% for client in clients %}
+			<tr>
+				<td>{{ client.id }}</td>
+				<td>{{ client.name }}</td>
+				<td>{{ client.address }}</td>
+				<td>{{ client.mobile }}</td>
+				<td>{{ client.remarks }}</td>
+				<td><a href="{% url 'credit' client.id  %}">{{ client.credits }}</a></td>
+				<td><a href="{% url 'payment' client.id  %}">{{ client.payments }}</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

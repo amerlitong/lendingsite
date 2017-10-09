@@ -1,0 +1,24 @@
+{% extends "lendingapp/base.html" %}
+{% block title %}
+	<title>Ledger</title>
+{% endblock %}	
+{% block content %}
+	<table>
+		<tr>
+			<th>AMOUNT</th>
+			<th>DATE</th>
+			<th>CATEGORY</th>
+			<th>BANK</th>
+			<th>REMARKS</th>
+		</tr>
+		{% for ledger in ledgers %}
+			<tr>
+				<td>{{ ledger.amount }}</td>
+				<td>{{ ledger.dt }}</td>
+				<td>{{ ledger.category }}</td>
+				<td>{{ ledger.bank }}</td>
+				<td>{{ ledger.remarks }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

@@ -3,22 +3,26 @@
 	<title>Credits</title>
 {% endblock %}
 {% block content %}
-	<table>
-		<tr>
-			<th>NAME</th>
-			<th>AMOUNT</th>
-			<th>INTEREST</th>
-			<th>DATE</th>
-			<th>REMARKS</th>
-		</tr>
-		{% for credit in credits %}
+	<table class="table table-striped table-responsive">
+		<thead>
 			<tr>
-				<td>{{ credit.name }}</td>
-				<td>{{ credit.amount }}</td>
-				<td>{{ credit.interest }}</td>
-				<td>{{ credit.dt }}</td>
-				<td>{{ credit.remarks }}</td>
+				<th>NAME</th>
+				<th>AMOUNT</th>
+				<th>INTEREST</th>
+				<th>DATE</th>
+				<th>REMARKS</th>
 			</tr>
-		{% endfor %}
+		</thead>
+		<tbody>
+			{% for credit in credits %}
+				<tr>
+					<td>{{ credit.name }}</td>
+					<td>{{ credit.amount }}</td>
+					<td>{{ credit.interest }}</td>
+					<td>{{ credit.dt }}</td>
+					<td>{{ credit.remarks }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
 	</table>
 {% endblock %}

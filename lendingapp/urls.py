@@ -4,9 +4,9 @@ from . import views
 
 urlpatterns = [
 	url(r'^$', views.index, name='index'),
-	url(r'^client/', views.client, name='client'),
-	url(r'^client/add/', views.client, name='client_add'),
+	url(r'^client/add/', views.client_add, name='client_add'),
 	url(r'^client/edit/(?P<id>[0-9]+)', views.client, name='client_edit'),
+	url(r'^client/', views.client, name='client'),
 	url(r'^credit/(?P<client_id>[0-9]+)', views.credit, name='credit'),
 	url(r'^credit/add/(?P<client_id>[0-9]+)', views.credit, name='credit_add'),
 	url(r'^credit/edit/(?P<id>[0-9]+)', views.credit, name='credit_edit'),

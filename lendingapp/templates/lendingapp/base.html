@@ -23,14 +23,14 @@
             <a class="nav-link dropdown-toggle" href="{% url 'client' %}" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clients</a>
             <div class="dropdown-menu" aria-labelledby="dropdown01">
               <a class="dropdown-item" href="{% url 'client' %}">View</a>
-              <a class="dropdown-item" href="{% url 'client' %}">Add</a>
+              <a class="dropdown-item" href="{% url 'client_add' %}">Add</a>
             </div>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="{% url 'ledger' %}" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ledger</a>
             <div class="dropdown-menu" aria-labelledby="dropdown02">
               <a class="dropdown-item" href="{% url 'ledger' %}">View</a>
-              <a class="dropdown-item" href="{% url 'ledger' %}">Add</a>
+              <a class="dropdown-item" href="{% url 'ledger_add' %}">Add</a>
             </div>
           </li>
         </ul>
@@ -40,7 +40,6 @@
         </form>
       </div>
 	</nav>
-
 	<div class="container">
 		<div class="starter-template">
 			{% block content %}{% endblock %}

@@ -1,9 +1,10 @@
 {% extends "lendingapp/base.html" %}
+{% load extras %}
 {% block title %}
 	<title>Clients</title>
 {% endblock %}
 {% block content %}
-	<table class="table table-responsive table-striped">
+	<table class="table table-responsive table-striped table-bordered">
 		<thead>
 			<tr>
 				<th>ID</th>
@@ -13,18 +14,20 @@
 				<th>REMARKS</th>
 				<th>CREDITS</th>
 				<th>PAYMENTS</th>
+				<th>BALANCE</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for client in clients %}
 				<tr>
 					<td>{{ client.id }}</td>
-					<td>{{ client.name }}</td>
+					<td><a href="{% url 'client_edit' client.id  %}">{{ client.name }}</a></a> <a href="{% url 'credit_add' client.id  %}">Add Credit</a></td>
 					<td>{{ client.address }}</td>
 					<td>{{ client.mobile }}</td>
 					<td>{{ client.remarks }}</td>
 					<td><a href="{% url 'credit' client.id  %}">{{ client.credits }}</a></td>
 					<td><a href="{% url 'payment' client.id  %}">{{ client.payments }}</a></td>
+					<td>{{ client.credits|sub:client.payments }}</td>
 				</tr>
 			{% endfor %}
 		</tbody>

@@ -10,12 +10,12 @@ class ClientForm(ModelForm):
 class CreditForm(ModelForm):
 	class Meta:
 		model = Credit
-		fields = '__all__'
+		exclude = ['client_fk']
 
 class PaymentForm(ModelForm):
 	class Meta:
 		model = Payment
-		fields = '__all__'
+		exclude = ['credit_fk']
 
 class LedgerForm(ModelForm):
 	class Meta:

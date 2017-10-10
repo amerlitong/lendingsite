@@ -3,10 +3,10 @@
 	<title>Payments</title>
 {% endblock %}
 {% block content %}
+<h2>Payments for {{ client.name}}</h2>
 	<table class="table table-responsive table-striped">
 		<thead>
 			<tr>
-				<th>NAME</th>
 				<th>AMOUNT</th>
 				<th>INTEREST</th>
 				<th>DATE</th>
@@ -16,7 +16,6 @@
 		<tbody>
 			{% for payment in payments %}
 				<tr>
-					<td>{{ payment.name }}</td>
 					<td>{{ payment.amount }}</td>
 					<td>{{ payment.interest }}</td>
 					<td>{{ payment.dt }}</td>

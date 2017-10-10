@@ -24,13 +24,6 @@ class Client(models.Model):
 		payment = Payment.objects.filter(credit_fk__client_fk=self.id).aggregate(total=Sum(F('amount')))
 		return payment['total'] if payment['total'] is not None else 0.0
 
-	def balance(self):
-		credit = self.credits()
-		payment = self.payments()
-		if payment == 0.0:
-			return credit
-		else:
-			return credit - payment
 
 class Credit(CommonInfo):
 	client_fk = models.ForeignKey(Client,verbose_name='Client')
@@ -40,7 +33,7 @@ class Credit(CommonInfo):
 
 	def payments(self):
 		payment = Payment.objects.filter(credit_fk=self.id).aggregate(total=Sum(F('amount')))
-		return payment['total']
+		return payment['total'] if payment['total'] is not None else 0.0
 
 	def __str__(self):
 		return '{}, {}'.format(self.client_fk.name, str(self.amount))

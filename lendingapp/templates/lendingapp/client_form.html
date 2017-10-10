@@ -1,7 +1,18 @@
 {% extends "lendingapp/base.html" %}
+{% load extras %}
 {% block title %}
-	<title>Add Client</title>
+	<title>Add/Edit Client</title>
 {% endblock %}
 {% block content %}
-	{{ form.as_p }}
+<h2>Add/Edit Client</h2>
+	<form action="" method="POST">
+		{% csrf_token %}
+		{%  for field in form %}
+			<div class="form-group">
+				{{ field.errors }}
+				{% input_control "text" field.html_name field.value|default:"" %}
+			</div>
+		{% endfor %}
+		<input class="form-control btn btn-primary" type="submit" value="Add/Save">
+	</form>
 {% endblock %}

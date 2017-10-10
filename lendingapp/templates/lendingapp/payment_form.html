@@ -1,0 +1,28 @@
+{% extends "lendingapp/base.html" %}
+{% load extras %}
+{% block title %}
+	<title>Add/Edit Payment</title>
+{% endblock %}
+{% block content %}
+<h2>Add/Edit Payment for {{ client.name }}</h2>
+	<form action="" method="POST">
+		{% csrf_token %}
+		<div class="form-group">
+			{{ form.amount.errors }}
+			{% input_control "number" form.amount.html_name form.amount.value|default:"" %}
+		</div>
+		<div class="form-group">
+			{{ form.interest.errors }}
+			{% input_control "number" form.interest.html_name form.interest.value|default:"" %}
+		</div>
+		<div class="form-group">
+			{{ form.dt.errors }}
+			{% input_control "date" form.dt.html_name form.dt.value|current_date %}
+		</div>
+		<div class="form-group">
+			{{ form.remarks.errors }}
+			{% input_control "text" form.remarks.html_name form.remarks.value|default:"" %}
+		</div>
+		<input class="form-control btn btn-primary" type="submit" value="Add/Save">
+	</form>
+{% endblock %}

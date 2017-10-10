@@ -16,7 +16,7 @@ def export_actions(modeladmin,request,queryset):
 export_actions.short_description = 'Export to CSV'
 
 class ClientAdmin(admin.ModelAdmin):
-	list_display = ['name','address','mobile','credits','payments','balance','remarks']
+	list_display = ['name','address','mobile','credits','payments','remarks']
 	search_fields = ['name']
 	list_per_page = 20
 	ordering = ['name']

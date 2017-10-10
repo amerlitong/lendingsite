@@ -69,4 +69,10 @@ def ledger(request):
 	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers})
 
 def ledger_add(request):
-	pass
+	form = forms.LedgerForm()
+	if request.method == "POST":
+		form = forms.LedgerForm(request.POST)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect(reverse('ledger'))
+	return render(request, 'lendingapp/ledger_form.html',{'form':form})

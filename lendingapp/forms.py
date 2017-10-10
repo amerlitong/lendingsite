@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, Select
 
 from .models import Client, Credit, Payment, Ledger
 
@@ -20,4 +20,8 @@ class PaymentForm(ModelForm):
 class LedgerForm(ModelForm):
 	class Meta:
 		model = Ledger
-		fields = '__all__'
+		fields = ['amount','dt','remarks','category','bank']
+		widgets = {
+			'category': Select(attrs={'class':'form-control'}),
+			'bank': Select(attrs={'class':'form-control'}),
+		}

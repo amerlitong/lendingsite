@@ -74,11 +74,9 @@ def credit_edit(request,id):
 
 def credit_del(request,id):
 	credit = models.Credit.objects.get(pk=id)
-	ledger = models.Ledger.objects.filter(credit_id=id)
 	payment = models.Payment.objects.filter(credit_fk=credit)
 	if payment.count() == 0:
 		credit.delete()
-		ledger.delete()
 		return HttpResponseRedirect(reverse('credit',args=(credit.client_fk.id,)))
 	return HttpResponseRedirect(reverse('credit',args=(credit.client_fk.id,)))
 
@@ -106,7 +104,6 @@ def payment_edit(request,id):
 
 def payment_del(request,id):
 	payment = models.Payment.objects.get(pk=id).delete()
-	models.Ledger.objects.filter(payment_id=id).delete()
 	return HttpResponseRedirect(reverse('payment',args=(payment.credit_fk.client_fk.id)))
 
 def ledger(request):

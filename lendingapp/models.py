@@ -37,6 +37,11 @@ class Credit(CommonInfo):
 	def __str__(self):
 		return '{}, {}'.format(self.client_fk.name, str(self.amount))
 
+	def delete(self,*args,**kwargs):
+		ledger = Ledger.objects.filter(credit_id=self.id)
+		ledger.delete()
+		super(Credit,self).delete(*args,**kwargs)
+
 	def save(self,*args, **kwargs):
 		super(Credit,self).save(*args,**kwargs)
 		ledger = Ledger()
@@ -59,6 +64,11 @@ class Payment(CommonInfo):
 
 	def total(self):
 		return self.amount + self.interest
+
+	def delete(self,*args,**kwargs):
+		ledger = Ledger.objects.filter(payment_id=self.id)
+		ledger.delete()
+		super(Payment,self).delete(*args,**kwargs)
 
 	def save(self,*args, **kwargs):
 		super(Payment,self).save(*args,**kwargs)

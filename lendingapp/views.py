@@ -8,6 +8,7 @@ from . import models, forms
 def index(request):
 	return render(request,'lendingapp/index.html')
 
+@login_required
 def client(request):
 	clients = models.Client.objects.all()
 	return render(request,'lendingapp/client.html',{'clients':clients})

@@ -3,7 +3,8 @@
 	<title>Ledger</title>
 {% endblock %}	
 {% block content %}
-	<table class="table table-responsive table-striped">
+<h2>Ledger</h2>
+	<table class="table table-responsive table-striped table-bordered">
 		<thead>
 			<tr>
 				<th>AMOUNT</th>
@@ -11,6 +12,7 @@
 				<th>CATEGORY</th>
 				<th>BANK</th>
 				<th>REMARKS</th>
+				<th>ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -21,6 +23,12 @@
 					<td>{{ ledger.category }}</td>
 					<td>{{ ledger.bank }}</td>
 					<td>{{ ledger.remarks }}</td>
+					<td>
+						{% if not ledger.credit_id and not ledger.payment_id %}
+							<a href="{% url 'ledger_edit' ledger.id %}">Edit</a><br>
+							<a href="{% url 'ledger_del' ledger.id %}">Delete</a><br>
+						{% endif %}
+					</td>
 				</tr>
 			{% endfor %}
 		</tbody>

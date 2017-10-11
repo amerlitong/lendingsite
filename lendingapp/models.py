@@ -24,7 +24,6 @@ class Client(models.Model):
 		payment = Payment.objects.filter(credit_fk__client_fk=self.id).aggregate(total=Sum(F('amount')))
 		return payment['total'] if payment['total'] is not None else 0.0
 
-
 class Credit(CommonInfo):
 	client_fk = models.ForeignKey(Client,verbose_name='Client')
 
@@ -39,14 +38,15 @@ class Credit(CommonInfo):
 		return '{}, {}'.format(self.client_fk.name, str(self.amount))
 
 	def save(self,*args, **kwargs):
+		super(Credit,self).save(*args,**kwargs)
 		ledger = Ledger()
+		ledger.credit_id = self.id
 		ledger.category = 'Credit'
 		ledger.amount = self.amount
-		ledger.interest = 0.0
+		ledger.interest = self.interest
 		ledger.remarks = self.client_fk.name
 		ledger.dt = self.dt
 		ledger.save()
-		super(Credit,self).save(*args,**kwargs)
 
 class Payment(CommonInfo):
 	credit_fk = models.ForeignKey(Credit,verbose_name='Credit')
@@ -61,15 +61,16 @@ class Payment(CommonInfo):
 		return self.amount + self.interest
 
 	def save(self,*args, **kwargs):
+		super(Payment,self).save(*args,**kwargs)
 		ledger = Ledger()
+		ledger.payment_id = self.id
 		ledger.category = 'Payment'
 		ledger.amount = self.amount + self.interest
-		ledger.interest = 0.0
+		ledger.interest = self.interest
 		ledger.remarks = self.credit_fk.client_fk.name
 		ledger.dt = self.dt
 		ledger.save()
-		super(Payment,self).save(*args,**kwargs)
-
+		
 class Ledger(CommonInfo):
 	cats = [
 		('Payment','Payment'),
@@ -81,3 +82,5 @@ class Ledger(CommonInfo):
 	]
 	category = models.CharField(max_length=10,choices=cats)
 	bank = models.CharField(max_length=10,choices=[('bdo','BDO'),('bpi','BPI')],blank=True)
+	credit_id = models.IntegerField()
+	payment_id = models.IntegerField()

@@ -14,17 +14,23 @@
 				<th>PAYMENT</th>
 				<th>BALANCE</th>
 				<th>REMARKS</th>
+				<th>ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for credit in credits %}
 				<tr>
-					<td><a href="{% url 'payment_add' credit.id %}">{{ credit.amount }}</a></td>
+					<td>{{ credit.amount }}</td>
 					<td>{{ credit.interest|percent }}</td>
 					<td>{{ credit.dt }}</td>
 					<td>{{ credit.payments }}</td>
 					<td>{{ credit.amount|sub:credit.payments }}</td>
 					<td>{{ credit.remarks }}</td>
+					<td>
+						<a href="{% url 'payment_add' credit.id %}">Add Payment</a><br>
+						<a href="{% url 'credit_edit' credit.id %}">Edit</a><br>
+						<a href="{% url 'credit_del' credit.id %}">Delete</a>
+					</td>
 				</tr>
 			{% endfor %}
 		</tbody>

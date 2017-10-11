@@ -4,7 +4,7 @@
 	<title>Add/Edit Payment</title>
 {% endblock %}
 {% block content %}
-<h2>Add/Edit Payment for {{ client.name }}</h2>
+<h2>Add/Edit Payment for {{ client.name }}({{ balance }})</h2>
 	<form action="" method="POST">
 		{% csrf_token %}
 		<div class="form-group">

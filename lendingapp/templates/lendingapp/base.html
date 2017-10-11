@@ -3,8 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	{% block title %}{% endblock %}
+  <link rel="stylesheet" type = "text/css" href="{% static 'lendingapp/css/custom.css' %}"/>
 	<link rel="stylesheet" type = "text/css" href="{% static 'lendingapp/css/bootstrap.min.css' %}"/>
-	<link rel="stylesheet" type = "text/css" href="{% static 'lendingapp/css/custom.css' %}"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -34,15 +34,18 @@
             </div>
           </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
       </div>
 	</nav>
 	<div class="container">
 		<div class="starter-template">
-			{% block content %}{% endblock %}
+          {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert"> 
+                  {{ message }}
+                </div>
+              {% endfor %}
+          {% endif %}
+      	{% block content %}{% endblock %}
 		</div>
 	</div><!-- /.container -->
 	<script src="{% static 'lendingapp/js/jquery-3.2.1.slim.min.js' %}"></script>

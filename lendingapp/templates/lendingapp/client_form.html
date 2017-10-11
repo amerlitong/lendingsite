@@ -9,7 +9,6 @@
 		{% csrf_token %}
 		{%  for field in form %}
 			<div class="form-group">
-				{{ field.errors }}
 				{% input_control "text" field.html_name field.value|default:"" %}
 			</div>
 		{% endfor %}

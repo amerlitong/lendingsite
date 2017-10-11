@@ -1,4 +1,5 @@
 {% extends "lendingapp/base.html" %}
+{% load extras %}
 {% block title %}
 	<title>Ledger</title>
 {% endblock %}	
@@ -33,4 +34,17 @@
 			{% endfor %}
 		</tbody>
 	</table>
+	<nav aria-label="Page navigation example">
+	  <ul class="pagination">
+	  	{% if ledgers.has_previous %}
+	    	<li class="page-item"><a class="page-link" href="?page={{ ledgers.previous_page_number }}">Previous</a></li>
+	    {% endif %}
+	    {% for i in ledgers.paginator.num_pages|_range %}
+	    	 <li class="page-item"><a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+	    {% endfor %}
+	    {% if ledgers.has_next %}
+	    	<li class="page-item"><a class="page-link" href="?page={{ ledgers.next_page_number }}">Next</a></li>
+	    {% endif %}
+	  </ul>
+	</nav>
 {% endblock %}

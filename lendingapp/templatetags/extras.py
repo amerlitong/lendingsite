@@ -7,6 +7,10 @@ register = template.Library()
 @register.filter
 def percent(value):
 	return '{} %'.format(value*100)
+	
+@register.filter
+def _range(value):
+	return [i for i in range(value)]
 
 @register.filter
 def sub(value,arg):

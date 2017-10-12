@@ -5,7 +5,7 @@
 {% endblock %}	
 {% block content %}
 <h2>Ledger</h2>
-	<table class="table table-responsive table-striped table-bordered">
+	<table class="table table-responsive table-striped table-bordered table-sm">
 		<thead>
 			<tr>
 				<th>AMOUNT</th>
@@ -34,17 +34,5 @@
 			{% endfor %}
 		</tbody>
 	</table>
-	<nav aria-label="Page navigation example">
-	  <ul class="pagination">
-	  	{% if ledgers.has_previous %}
-	    	<li class="page-item"><a class="page-link" href="?page={{ ledgers.previous_page_number }}">Previous</a></li>
-	    {% endif %}
-	    {% for i in ledgers.paginator.num_pages|_range %}
-	    	 <li class="page-item"><a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
-	    {% endfor %}
-	    {% if ledgers.has_next %}
-	    	<li class="page-item"><a class="page-link" href="?page={{ ledgers.next_page_number }}">Next</a></li>
-	    {% endif %}
-	  </ul>
-	</nav>
+	{% include "lendingapp/pagination_snippet.html" with model=ledgers page=page %}
 {% endblock %}

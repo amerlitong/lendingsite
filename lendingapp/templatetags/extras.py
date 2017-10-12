@@ -7,10 +7,6 @@ register = template.Library()
 @register.filter
 def percent(value):
 	return '{} %'.format(value*100)
-	
-@register.filter
-def _range(value):
-	return [i for i in range(value)]
 
 @register.filter
 def sub(value,arg):
@@ -31,7 +27,14 @@ def current_date(value):
 	return date_to_str(date.today(),"%Y-%m-%d")
 
 @register.simple_tag
-def input_control(type,name,value):
-	d = dict(type=type,name=name,name1=name.upper(),value=value)
-	s = '''<input class="form-control" type={type} step=0.001 id={name} placeholder={name1} name={name} value={value}>'''.format(**d)
+def input_control(type,name,value,errors):
+	d = dict(type=type,name=name,name1=name.upper(),value=value,errors=errors)
+	s = '''
+		<div class="form-group">
+			<input class="form-control" type={type} step=0.001 id={name} placeholder={name1} name={name} value={value}>
+		</div>
+		<div class="invalid-feedback">
+        	{errors}
+      	</div>
+		'''.format(**d)
 	return mark_safe(s)

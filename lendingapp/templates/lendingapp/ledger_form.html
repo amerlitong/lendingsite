@@ -7,26 +7,7 @@
 <h2>Add/Edit Ledger</h2>
 	<form action="" method="POST">
 		{% csrf_token %}
-		<div class="form-group">
-			{{ form.amount.errors }}
-			{% input_control "number" form.amount.html_name form.amount.value|default:"" %}
-		</div>
-		<div class="form-group">
-			{{ form.dt.errors }}
-			{% input_control "date" form.dt.html_name form.dt.value|current_date %}
-		</div>
-		<div class="form-group">
-			{{ form.remarks.errors }}
-			{% input_control "text" form.remarks.html_name form.remarks.value|default:"" %}
-		</div>
-		<div class="form-group">
-			{{ form.category.errors }}
-			{{ form.category }}
-		</div>
-		<div class="form-group">
-			{{ form.bank.errors }}
-			{{ form.bank }}
-		</div>
+		{{ form.as_p }}
 		<input class="form-control btn btn-primary" type="submit" value="Add/Save">
 	</form>
 {% endblock %}

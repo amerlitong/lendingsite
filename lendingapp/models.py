@@ -94,3 +94,7 @@ class Ledger(CommonInfo):
 	bank = models.CharField(max_length=10,choices=[('bdo','BDO'),('bpi','BPI')],blank=True)
 	credit_id = models.IntegerField()
 	payment_id = models.IntegerField()
+
+	def save(self,*args, **kwargs):
+		self.interest = 0.0
+		super(Ledger,self).save(*args,**kwargs)

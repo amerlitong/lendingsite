@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -6,24 +6,29 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from . import models, forms
 
+page_count = 10
+
+##############INDEX#########################
 @login_required
 def index(request):
 	return render(request,'lendingapp/index.html')
 
+##############CLIENT#########################
 @login_required
 def client(request):
 	client_list = models.Client.objects.all()
-	paginator = Paginator(client_list,25)
+	paginator = Paginator(client_list,page_count)
 	page = request.GET.get('page')
-	
+
 	try:
 		clients = paginator.page(page)
 	except PageNotAnInteger:
 		clients = paginator.page(1)
+		page = 1
 	except EmptyPage:
 		clients = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/client.html',{'clients':clients})
+	return render(request,'lendingapp/client.html',{'clients':clients,'page':int(page)})
 @login_required
 def client_add(request):
 	form = forms.ClientForm()
@@ -56,21 +61,23 @@ def client_del(request,id):
 		client.delete()
 	return HttpResponseRedirect(reverse('client'))
 
+##############CREDIT#########################
 @login_required
 def credit(request,client_id):
 	credits_list = models.Credit.objects.filter(client_fk=client_id)
 	client = models.Client.objects.get(pk=client_id)
-	paginator = Paginator(credits_list,25)
+	paginator = Paginator(credits_list,page_count)
 	page = request.GET.get('page')
 	
 	try:
 		credits = paginator.page(page)
 	except PageNotAnInteger:
 		credits = paginator.page(1)
+		page = 1
 	except EmptyPage:
 		credits = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/credit.html',{'credits':credits,'client':client})
+	return render(request,'lendingapp/credit.html',{'credits':credits,'client':client,'page':int(page)})
 
 @login_required
 def credit_add(request,client_id):
@@ -87,7 +94,7 @@ def credit_add(request,client_id):
 
 @login_required
 def credit_edit(request,id):
-	credit = models.Credit.objects.get(pk=id)
+	credit = get_object_or_404(models.Credit, pk=id)
 	client = credit.client_fk
 	form = forms.CreditForm(instance=credit)
 	if request.method == "POST":
@@ -112,21 +119,25 @@ def credit_del(request,id):
 		return HttpResponseRedirect(reverse('credit',args=(credit.client_fk.id,)))	
 	return HttpResponseRedirect(reverse('credit',args=(credit.client_fk.id,)))
 
+##############PAYMENT#########################
+@login_required
 def payment(request,client_id):
 	client = models.Client.objects.get(pk=client_id)
 	payments_list = models.Payment.objects.filter(credit_fk__client_fk_id=client_id)
-	paginator = Paginator(payments_list,25)
+	paginator = Paginator(payments_list,page_count)
 	page = request.GET.get('page')
 	
 	try:
 		payments = paginator.page(page)
 	except PageNotAnInteger:
 		payments = paginator.page(1)
+		page = 1
 	except EmptyPage:
 		payments = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/payment.html',{'payments':payments,'client':client})
+	return render(request,'lendingapp/payment.html',{'payments':payments,'client':client,'page':int(page)})
 
+@login_required
 def payment_add(request,credit_id):
 	credit = models.Credit.objects.get(pk=credit_id)
 	balance = credit.amount - credit.payments()
@@ -143,42 +154,72 @@ def payment_add(request,credit_id):
 
 @login_required
 def payment_edit(request,id):
-	pass
+	payment = models.Payment.objects.get(pk=id)
+	credit = payment.credit_fk
+	client = credit.client_fk
+	balance = credit.amount - payment.amount
+	form = forms.PaymentForm(instance=payment)
+	if request.method == "POST":
+		form = forms.PaymentForm(instance=payment, data=request.POST)
+		if form.is_valid():
+			f = form.save(commit=False)
+			f.credit_fk = credit
+			f.save()
+			return HttpResponseRedirect(reverse('payment',args=(credit.client_fk.id)))
+	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':client,'balance':balance})
 
 @login_required
 def payment_del(request,id):
 	payment = models.Payment.objects.get(pk=id).delete()
 	return HttpResponseRedirect(reverse('payment',args=(payment.credit_fk.client_fk.id)))
 
+##############LEDGER#########################
 @login_required
 def ledger(request):
 	ledgers_list = models.Ledger.objects.all()
-	paginator = Paginator(ledgers_list,25)
+	paginator = Paginator(ledgers_list,page_count)
 	page = request.GET.get('page')
 	
 	try:
 		ledgers = paginator.page(page)
 	except PageNotAnInteger:
 		ledgers = paginator.page(1)
+		page = 1
 	except EmptyPage:
 		ledgers = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers})
+	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers,'page':int(page)})
 
 @login_required
 def ledger_add(request):
-	form = forms.LedgerForm()
+	form = forms.LedgerForm(initial={'category':'Misc Out'})
 	if request.method == "POST":
 		form = forms.LedgerForm(request.POST)
 		if form.is_valid():
 			form.save()
+			messages.success(request,'Ledger successfully added!')
 			return HttpResponseRedirect(reverse('ledger'))
 	return render(request, 'lendingapp/ledger_form.html',{'form':form})
 
 @login_required
 def ledger_edit(request,id):
-	pass
+	ledger = models.Ledger.objects.get(pk=id)
+	form = forms.LedgerForm(instance=ledger)
+	if request.method == "POST":
+		form = forms.LedgerForm(instance=ledger, data=request.POST)
+		if form.is_valid():
+			form.save()
+			messages.success(request,'Ledger successfully edited!')
+			return HttpResponseRedirect(reverse('ledger'))
+	return render(request, 'lendingapp/ledger_form.html',{'form':form})
 
 @login_required
 def ledger_del(request,id):
-	pass
+	ledger = models.Ledger.objects.get(pk=id)
+	if ledger.category not in ['Payment','Credit']:
+		ledger.delete()
+		messages.success(request,'Ledger successfully deleted!')
+		return HttpResponseRedirect(reverse('ledger'))
+	else:
+		messages.warning(request,'Ledger deletion failed!')
+	return HttpResponseRedirect(reverse('ledger'))

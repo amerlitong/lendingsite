@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 <h2>Clients</h2>
-	<table class="table table-responsive table-striped table-bordered">
+	<table class="table table-responsive table-striped table-bordered table-sm">
 		<thead>
 			<tr>
 				<th>ID</th>
@@ -39,17 +39,5 @@
 			{% endfor %}
 		</tbody>
 	</table>
-	<nav aria-label="Page navigation example">
-	  <ul class="pagination">
-	  	{% if clients.has_previous %}
-	    	<li class="page-item"><a class="page-link" href="?page={{ clients.previous_page_number }}">Previous</a></li>
-	    {% endif %}
-	    {% for i in clients.paginator.num_pages|_range %}
-	    	 <li class="page-item"><a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
-	    {% endfor %}
-	    {% if clients.has_next %}
-	    	<li class="page-item"><a class="page-link" href="?page={{ clients.next_page_number }}">Next</a></li>
-	    {% endif %}
-	  </ul>
-	</nav>
+	{% include "lendingapp/pagination_snippet.html" with model=clients page=page %}
 {% endblock %}

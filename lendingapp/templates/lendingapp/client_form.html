@@ -7,11 +7,7 @@
 <h2>Add/Edit Client</h2>
 	<form action="" method="POST">
 		{% csrf_token %}
-		{%  for field in form %}
-			<div class="form-group">
-				{% input_control "text" field.html_name field.value|default:"" %}
-			</div>
-		{% endfor %}
+		{{ form.as_p }}
 		<input class="form-control btn btn-primary" type="submit" value="Add/Save">
 	</form>
 {% endblock %}

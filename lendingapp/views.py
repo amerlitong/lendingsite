@@ -8,10 +8,17 @@ from . import models, forms
 
 page_count = 10
 
+def error_404(request):
+	return render(request,'lendingapp/404.html',{})
+
 ##############INDEX#########################
 @login_required
 def index(request):
-	return render(request,'lendingapp/index.html')
+	credits = models.Credit.objects.values('amount','interest','dt','client_fk','client_fk')
+	payments = models.Payment.objects.values('amount','interest','dt','credit_fk__client_fk','credit_fk__client_fk')
+	ledger = models.Ledger.objects.values('amount','interest','dt','category','remarks')
+	summary = ledger.union(credits,payments,all=True)
+	return render(request,'lendingapp/index.html',{'summary':summary})
 
 ##############CLIENT#########################
 @login_required
@@ -44,7 +51,7 @@ def client_add(request):
 
 @login_required
 def client_edit(request,id):
-	client = models.Client.objects.get(pk=id)
+	client = get_object_or_404(models.Client,pk=id)
 	form = forms.ClientForm(instance=client)
 	if request.method == "POST":
 		form = forms.ClientForm(instance=client, data=request.POST)
@@ -55,7 +62,7 @@ def client_edit(request,id):
 
 @login_required
 def client_del(request,id):
-	client = models.Client.objects.get(pk=id)
+	client = get_object_or_404(models.Client,pk=id)
 	credit = models.Credit.objects.filter(client_fk=client)
 	if credit.count() == 0:
 		client.delete()
@@ -64,8 +71,8 @@ def client_del(request,id):
 ##############CREDIT#########################
 @login_required
 def credit(request,client_id):
+	client = get_object_or_404(models.Client,pk=client_id)
 	credits_list = models.Credit.objects.filter(client_fk=client_id)
-	client = models.Client.objects.get(pk=client_id)
 	paginator = Paginator(credits_list,page_count)
 	page = request.GET.get('page')
 	
@@ -81,8 +88,8 @@ def credit(request,client_id):
 
 @login_required
 def credit_add(request,client_id):
+	client = get_object_or_404(models.Client,pk=client_id)
 	form = forms.CreditForm()
-	client = models.Client.objects.get(pk=client_id)
 	if request.method == "POST":
 		form = forms.CreditForm(request.POST)
 		if form.is_valid():
@@ -108,7 +115,7 @@ def credit_edit(request,id):
 
 @login_required
 def credit_del(request,id):
-	credit = models.Credit.objects.get(pk=id)
+	credit = get_object_or_404(models.Credit,pk=id)
 	payment = models.Payment.objects.filter(credit_fk=credit)
 	if payment.count() == 0:
 		credit.delete()
@@ -122,7 +129,7 @@ def credit_del(request,id):
 ##############PAYMENT#########################
 @login_required
 def payment(request,client_id):
-	client = models.Client.objects.get(pk=client_id)
+	client = get_object_or_404(models.Client,pk=client_id)
 	payments_list = models.Payment.objects.filter(credit_fk__client_fk_id=client_id)
 	paginator = Paginator(payments_list,page_count)
 	page = request.GET.get('page')
@@ -139,7 +146,7 @@ def payment(request,client_id):
 
 @login_required
 def payment_add(request,credit_id):
-	credit = models.Credit.objects.get(pk=credit_id)
+	credit = get_object_or_404(models.Credit,pk=credit_id)
 	balance = credit.amount - credit.payments()
 	client = credit.client_fk
 	form = forms.PaymentForm(initial={'interest':balance * credit.interest})
@@ -154,7 +161,7 @@ def payment_add(request,credit_id):
 
 @login_required
 def payment_edit(request,id):
-	payment = models.Payment.objects.get(pk=id)
+	payment = get_object_or_404(models.Payment.objects.get,pk=id)
 	credit = payment.credit_fk
 	client = credit.client_fk
 	balance = credit.amount - payment.amount
@@ -187,7 +194,6 @@ def ledger(request):
 		page = 1
 	except EmptyPage:
 		ledgers = paginator.page(paginator.num_pages)
-
 	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers,'page':int(page)})
 
 @login_required
@@ -203,7 +209,7 @@ def ledger_add(request):
 
 @login_required
 def ledger_edit(request,id):
-	ledger = models.Ledger.objects.get(pk=id)
+	ledger = get_object_or_404(models.Ledger,pk=id)
 	form = forms.LedgerForm(instance=ledger)
 	if request.method == "POST":
 		form = forms.LedgerForm(instance=ledger, data=request.POST)
@@ -215,7 +221,7 @@ def ledger_edit(request,id):
 
 @login_required
 def ledger_del(request,id):
-	ledger = models.Ledger.objects.get(pk=id)
+	ledger = get_object_or_404(models.Ledger,pk=id)
 	if ledger.category not in ['Payment','Credit']:
 		ledger.delete()
 		messages.success(request,'Ledger successfully deleted!')

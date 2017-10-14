@@ -15,11 +15,14 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.auth import views
+from django.contrib.auth import views as auth_views
+from lendingapp import views
 
 urlpatterns = [
 	url(r'^lending/',include('lendingapp.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', views.LoginView.as_view(template_name='auth/login.html'),name='login'),
-    url(r'^logout/$', views.LogoutView.as_view(),name='logout'),
+    url(r'^login/$', auth_views.LoginView.as_view(template_name='auth/login.html'),name='login'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(),name='logout'),
 ]
+
+handler404 = views.error_404

@@ -35,7 +35,7 @@ class Credit(CommonInfo):
 		return payment['total'] if payment['total'] is not None else 0.0
 
 	def __str__(self):
-		return '{}, {}'.format(self.client_fk.name, str(self.amount))
+		return '{}, {}'.format(self.client_fk.name, 'Credit')
 
 	def delete(self,*args,**kwargs):
 		ledger = Ledger.objects.filter(credit_id=self.id)
@@ -60,7 +60,7 @@ class Payment(CommonInfo):
 		return self.credit_fk.client_fk.name
 
 	def __str__(self):
-		return '{}'.format(self.credit_fk.client_fk.name)
+		return '{}, {}'.format(self.credit_fk.client_fk.name, 'Payment')
 
 	def total(self):
 		return self.amount + self.interest
@@ -83,16 +83,13 @@ class Payment(CommonInfo):
 		
 class Ledger(CommonInfo):
 	cats = [
-		('Payment','Payment'),
-		('Credit','Credit'),
 		('Remit','Remit'),
-		('Payment','Payment'),
 		('Misc In','Misc In'),
 		('Misc Out','Misc Out')
 	]
 	category = models.CharField(max_length=10,choices=cats)
 	bank = models.CharField(max_length=10,choices=[('bdo','BDO'),('bpi','BPI')],blank=True)
-	credit_id = models.IntegerField()
+	credit_id = models.IntegerField(null=True)
 	payment_id = models.IntegerField()
 
 	def save(self,*args, **kwargs):

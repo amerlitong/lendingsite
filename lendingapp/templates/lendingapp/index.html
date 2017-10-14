@@ -1,4 +1,25 @@
 {% extends "lendingapp/base.html" %}
 {% block content %}
-Amerlitong
+	<table class="table table-responsive table-striped table-bordered table-sm">
+		<thead>
+			<tr>
+				<th>AMOUNT</th>
+				<th>INTEREST</th>
+				<th>DATE</th>
+				<th>CATEGORY</th>
+				<th>REMARKS</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for summ in summary %}
+				<tr>
+					<td>{{ summ.amount }}</td>
+					<td>{{ summ.interest }}</td>
+					<td>{{ summ.dt }}</td>
+					<td>{{ summ.category }}</td>
+					<td>{{ summ.remarks}}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 {% endblock %}

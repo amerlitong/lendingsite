@@ -31,9 +31,9 @@
 					<td><a href="{% url 'payment' client.id  %}">{{ client.payments }}</a></td>
 					<td>{{ client.credits|sub:client.payments }}</td>
 					<td>
-						<a href="{% url 'credit_add' client.id  %}">Add Credit</a><br>
-						<a href="{% url 'client_edit' client.id  %}">Edit</a><br>
-						<a href="{% url 'client_del' client.id  %}">Delete</a><br>
+						<a href="{% url 'credit_add' client.id  %}">Add Credit</a> ,
+						<a href="{% url 'client_edit' client.id  %}">Edit</a> ,
+						<a href="{% url 'client_del' client.id  %}">Delete</a>
 					</td>
 				</tr>
 			{% endfor %}

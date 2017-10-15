@@ -16,8 +16,7 @@ urlpatterns = [
 	url(r'^payment/add/(?P<credit_id>[0-9]+)/$', views.payment_add, name='payment_add'),
 	url(r'^payment/edit/(?P<id>[0-9]+)/$', views.payment_edit, name='payment_edit'),
 	url(r'^payment/del/(?P<id>[0-9]+)/$', views.payment_del, name='payment_del'),
-	url(r'^ledger/$', views.ledger, name='ledger'),
 	url(r'^ledger/add/$', views.ledger_add, name='ledger_add'),
 	url(r'^ledger/edit/(?P<id>[0-9]+)/$', views.ledger_edit, name='ledger_edit'),
-	url(r'^ledger/delete/(?P<id>[0-9]+)/$', views.ledger_del, name='ledger_del'),
+	url(r'^ledger/del/(?P<id>[0-9]+)/$', views.ledger_del, name='ledger_del'),
 ]

@@ -27,6 +27,9 @@ class Client(models.Model):
 class Credit(CommonInfo):
 	client_fk = models.ForeignKey(Client,verbose_name='Client')
 
+	def cat(self):
+		return 'Credit'
+
 	def name(self):
 		return self.client_fk.name
 
@@ -36,22 +39,6 @@ class Credit(CommonInfo):
 
 	def __str__(self):
 		return '{}, {}'.format(self.client_fk.name, 'Credit')
-
-	def delete(self,*args,**kwargs):
-		ledger = Ledger.objects.filter(credit_id=self.id)
-		ledger.delete()
-		super(Credit,self).delete(*args,**kwargs)
-
-	def save(self,*args, **kwargs):
-		super(Credit,self).save(*args,**kwargs)
-		ledger = Ledger()
-		ledger.credit_id = self.id
-		ledger.category = 'Credit'
-		ledger.amount = self.amount
-		ledger.interest = self.interest
-		ledger.remarks = self.client_fk.name
-		ledger.dt = self.dt
-		ledger.save()
 
 class Payment(CommonInfo):
 	credit_fk = models.ForeignKey(Credit,verbose_name='Credit')
@@ -64,22 +51,6 @@ class Payment(CommonInfo):
 
 	def total(self):
 		return self.amount + self.interest
-
-	def delete(self,*args,**kwargs):
-		ledger = Ledger.objects.filter(payment_id=self.id)
-		ledger.delete()
-		super(Payment,self).delete(*args,**kwargs)
-
-	def save(self,*args, **kwargs):
-		super(Payment,self).save(*args,**kwargs)
-		ledger = Ledger()
-		ledger.payment_id = self.id
-		ledger.category = 'Payment'
-		ledger.amount = self.amount + self.interest
-		ledger.interest = self.interest
-		ledger.remarks = self.credit_fk.client_fk.name
-		ledger.dt = self.dt
-		ledger.save()
 		
 class Ledger(CommonInfo):
 	cats = [

@@ -4,7 +4,7 @@
 	<title>Payments</title>
 {% endblock %}
 {% block content %}
-<h2>Payments for {{ client.name}}</h2>
+<h2>Payments for {{ client }}</h2>
 	<table class="table table-responsive table-striped table-bordered table-sm">
 		<thead>
 			<tr>
@@ -23,8 +23,8 @@
 					<td>{{ payment.dt }}</td>
 					<td>{{ payment.remarks }}</td>
 					<td>
-						<a href="{% url 'payment_edit' payment.id %}">Edit</a><br>
-						<a href="{% url 'payment_del' payment.id %}">Delete</a><br>
+						<a href="{% url 'payment_edit' payment.id %}">Edit</a> ,
+						<a href="{% url 'payment_del' payment.id %}">Delete</a> ,
 					</td>
 				</tr>
 			{% endfor %}

@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import CharField, Value
 from . import models, forms
 
 page_count = 10
@@ -14,16 +15,27 @@ def error_404(request):
 ##############INDEX#########################
 @login_required
 def index(request):
-	credits = models.Credit.objects.values('amount','interest','dt','client_fk','client_fk')
-	payments = models.Payment.objects.values('amount','interest','dt','credit_fk__client_fk','credit_fk__client_fk')
-	ledger = models.Ledger.objects.values('amount','interest','dt','category','remarks')
-	summary = ledger.union(credits,payments,all=True)
-	return render(request,'lendingapp/index.html',{'summary':summary})
+	credits = models.Credit.objects.annotate(cat=Value('Credit',output_field=CharField())).select_related('client_fk').values('id','amount','interest','dt','cat','client_fk__name')
+	payments = models.Payment.objects.annotate(cat=Value('Payment',output_field=CharField())).select_related('credit_fk__client_fk').values('id','amount','interest','dt','cat','credit_fk__client_fk__name')
+	ledger = models.Ledger.objects.values('id','amount','interest','dt','remarks','category')
+	summary_list = ledger.union(credits,payments,all=True)
+	paginator = Paginator(summary_list,page_count)
+	page = request.GET.get('page')
+
+	try:
+		summary = paginator.page(page)
+	except PageNotAnInteger:
+		summary = paginator.page(1)
+		page = 1
+	except EmptyPage:
+		summary = paginator.page(paginator.num_pages)
+
+	return render(request,'lendingapp/index.html',{'summary':summary,'page':int(page)})
 
 ##############CLIENT#########################
 @login_required
 def client(request):
-	client_list = models.Client.objects.all()
+	client_list = models.Client.objects.order_by('name').all()
 	paginator = Paginator(client_list,page_count)
 	page = request.GET.get('page')
 
@@ -36,6 +48,7 @@ def client(request):
 		clients = paginator.page(paginator.num_pages)
 
 	return render(request,'lendingapp/client.html',{'clients':clients,'page':int(page)})
+
 @login_required
 def client_add(request):
 	form = forms.ClientForm()
@@ -44,9 +57,7 @@ def client_add(request):
 		if form.is_valid():
 			form.save()
 			messages.success(request,'Client added successfully!')
-			return HttpResponseRedirect(reverse('client'))
-		else:
-			messages.warning(request,'Please check for all required field!')		
+			return HttpResponseRedirect(reverse('client'))	
 	return render(request,'lendingapp/client_form.html',{'form':form})
 
 @login_required
@@ -57,6 +68,7 @@ def client_edit(request,id):
 		form = forms.ClientForm(instance=client, data=request.POST)
 		if form.is_valid():
 			form.save()
+			messages.success(request,'Client edited successfully!')
 			return HttpResponseRedirect(reverse('client'))	
 	return render(request,'lendingapp/client_form.html',{'form':form})
 
@@ -66,14 +78,17 @@ def client_del(request,id):
 	credit = models.Credit.objects.filter(client_fk=client)
 	if credit.count() == 0:
 		client.delete()
+		messages.success(request,'Client deleted successfully!')
+	else:
+		messages.warning(request,'Cannot be deleted, Credits(s) available!')	
 	return HttpResponseRedirect(reverse('client'))
 
 ##############CREDIT#########################
 @login_required
 def credit(request,client_id):
 	client = get_object_or_404(models.Client,pk=client_id)
-	credits_list = models.Credit.objects.filter(client_fk=client_id)
-	paginator = Paginator(credits_list,page_count)
+	credit_list = models.Credit.objects.filter(client_fk_id=client_id)
+	paginator = Paginator(credit_list,page_count)
 	page = request.GET.get('page')
 	
 	try:
@@ -84,7 +99,7 @@ def credit(request,client_id):
 	except EmptyPage:
 		credits = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/credit.html',{'credits':credits,'client':client,'page':int(page)})
+	return render(request,'lendingapp/credit.html',{'credits':credits,'client':client.name,'page':int(page)})
 
 @login_required
 def credit_add(request,client_id):
@@ -96,22 +111,22 @@ def credit_add(request,client_id):
 			f = form.save(commit=False)
 			f.client_fk = client
 			f.save()
+			messages.success(request,'Client added successfully!')
 			return HttpResponseRedirect(reverse('client'))
 	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':client})
 
 @login_required
 def credit_edit(request,id):
 	credit = get_object_or_404(models.Credit, pk=id)
-	client = credit.client_fk
 	form = forms.CreditForm(instance=credit)
 	if request.method == "POST":
 		form = forms.CreditForm(instance=credit, data=request.POST)
 		if form.is_valid():
 			f = form.save(commit=False)
-			f.client_fk = client
+			f.client_fk = credit.client_fk
 			f.save()
-			return HttpResponseRedirect(reverse('credit',args=(client.id,)))
-	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':client})
+			return HttpResponseRedirect(reverse('credit',args=(credit.client_fk.id,)))
+	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':credit.client_fk.name})
 
 @login_required
 def credit_del(request,id):
@@ -142,13 +157,12 @@ def payment(request,client_id):
 	except EmptyPage:
 		payments = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/payment.html',{'payments':payments,'client':client,'page':int(page)})
+	return render(request,'lendingapp/payment.html',{'payments':payments,'client':client.name,'page':int(page)})
 
 @login_required
 def payment_add(request,credit_id):
 	credit = get_object_or_404(models.Credit,pk=credit_id)
 	balance = credit.amount - credit.payments()
-	client = credit.client_fk
 	form = forms.PaymentForm(initial={'interest':balance * credit.interest})
 	if request.method == "POST":
 		form = forms.PaymentForm(request.POST)
@@ -157,45 +171,29 @@ def payment_add(request,credit_id):
 			f.credit_fk = credit
 			f.save()
 			return HttpResponseRedirect(reverse('client'))
-	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':client,'balance':balance})
+	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':credit.client_fk.name,'balance':balance})
 
 @login_required
 def payment_edit(request,id):
-	payment = get_object_or_404(models.Payment.objects.get,pk=id)
-	credit = payment.credit_fk
-	client = credit.client_fk
-	balance = credit.amount - payment.amount
+	payment = get_object_or_404(models.Payment,pk=id)
+	balance = payment.credit_fk.amount - payment.amount
 	form = forms.PaymentForm(instance=payment)
 	if request.method == "POST":
 		form = forms.PaymentForm(instance=payment, data=request.POST)
 		if form.is_valid():
 			f = form.save(commit=False)
-			f.credit_fk = credit
+			f.credit_fk = payment.credit_fk
 			f.save()
-			return HttpResponseRedirect(reverse('payment',args=(credit.client_fk.id)))
-	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':client,'balance':balance})
+			return HttpResponseRedirect(reverse('payment',args=(payment.credit_fk.client_fk.id,)))
+	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':payment.credit_fk.client_fk.name,'balance':balance})
 
 @login_required
 def payment_del(request,id):
-	payment = models.Payment.objects.get(pk=id).delete()
-	return HttpResponseRedirect(reverse('payment',args=(payment.credit_fk.client_fk.id)))
+	payment = get_object_or_404(models.Payment,pk=id)
+	payment.delete()
+	return HttpResponseRedirect(reverse('payment',args=(payment.credit_fk.client_fk.id,)))
 
 ##############LEDGER#########################
-@login_required
-def ledger(request):
-	ledgers_list = models.Ledger.objects.all()
-	paginator = Paginator(ledgers_list,page_count)
-	page = request.GET.get('page')
-	
-	try:
-		ledgers = paginator.page(page)
-	except PageNotAnInteger:
-		ledgers = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		ledgers = paginator.page(paginator.num_pages)
-	return render(request,'lendingapp/ledger.html',{'ledgers':ledgers,'page':int(page)})
-
 @login_required
 def ledger_add(request):
 	form = forms.LedgerForm(initial={'category':'Misc Out'})
@@ -204,7 +202,7 @@ def ledger_add(request):
 		if form.is_valid():
 			form.save()
 			messages.success(request,'Ledger successfully added!')
-			return HttpResponseRedirect(reverse('ledger'))
+			return HttpResponseRedirect(reverse('index'))
 	return render(request, 'lendingapp/ledger_form.html',{'form':form})
 
 @login_required
@@ -216,16 +214,12 @@ def ledger_edit(request,id):
 		if form.is_valid():
 			form.save()
 			messages.success(request,'Ledger successfully edited!')
-			return HttpResponseRedirect(reverse('ledger'))
+			return HttpResponseRedirect(reverse('index'))
 	return render(request, 'lendingapp/ledger_form.html',{'form':form})
 
 @login_required
 def ledger_del(request,id):
 	ledger = get_object_or_404(models.Ledger,pk=id)
-	if ledger.category not in ['Payment','Credit']:
-		ledger.delete()
-		messages.success(request,'Ledger successfully deleted!')
-		return HttpResponseRedirect(reverse('ledger'))
-	else:
-		messages.warning(request,'Ledger deletion failed!')
-	return HttpResponseRedirect(reverse('ledger'))
+	ledger.delete()
+	messages.success(request,'Ledger successfully deleted!')
+	return HttpResponseRedirect(reverse('index'))

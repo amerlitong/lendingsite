@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import CharField, Value
+from django.db.models import CharField, Value, Sum, Q
 from . import models, forms
 
 page_count = 10
@@ -19,6 +19,14 @@ def index(request):
 	payments = models.Payment.objects.annotate(cat=Value('Payment',output_field=CharField())).select_related('credit_fk__client_fk').values('id','amount','interest','dt','cat','credit_fk__client_fk__name')
 	ledger = models.Ledger.objects.values('id','amount','interest','dt','remarks','category')
 	summary_list = ledger.union(credits,payments,all=True)
+
+	credit_sum = credits.aggregate(total=Sum('amount'))
+	payment_sum = payments.aggregate(total=Sum('amount'))
+	ledger_in = ledger.filter(category='Misc In').aggregate(total=Sum('amount'))
+	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(total=Sum('amount'))
+
+	totals = [credit_sum,payment_sum,ledger_in,ledger_out]
+
 	paginator = Paginator(summary_list,page_count)
 	page = request.GET.get('page')
 
@@ -30,7 +38,7 @@ def index(request):
 	except EmptyPage:
 		summary = paginator.page(paginator.num_pages)
 
-	return render(request,'lendingapp/index.html',{'summary':summary,'page':int(page)})
+	return render(request,'lendingapp/index.html',{'summary':summary,'page':int(page),'totals':totals})
 
 ##############CLIENT#########################
 @login_required

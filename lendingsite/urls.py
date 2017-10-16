@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.auth import views as auth_views
 from lendingapp import views
 
@@ -24,5 +25,11 @@ urlpatterns = [
     url(r'^login/$', auth_views.LoginView.as_view(template_name='auth/login.html'),name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(),name='logout'),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
 
 handler404 = views.error_404

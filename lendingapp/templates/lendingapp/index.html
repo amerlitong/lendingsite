@@ -32,4 +32,20 @@
 		</tbody>
 	</table>
 	{% include "lendingapp/pagination_snippet.html" with model=summary page=page %}
+	<table class="table table-responsive table-striped table-bordered table-sm">
+		<thead>
+			<tr>
+				<th>CATEGORY</th>
+				<th>AMOUNT</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for total in totals  %}
+				<tr>
+					<td>{{ total.total }}</td>
+					<td>{{ total.total }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 {% endblock %}

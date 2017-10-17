@@ -13,9 +13,6 @@ class Client(models.Model):
 	mobile = models.CharField(max_length=50,blank=True)
 	remarks = models.TextField(null=False,blank=True)
 
-	def __str__(self):
-		return self.name
-
 	def credits(self):
 		credit = Credit.objects.filter(client_fk=self.id).aggregate(Sum('amount'))
 		return credit['amount__sum'] if credit['amount__sum'] is not None else 0.0
@@ -27,9 +24,6 @@ class Client(models.Model):
 class Credit(CommonInfo):
 	client_fk = models.ForeignKey(Client,verbose_name='Client')
 
-	def cat(self):
-		return 'Credit'
-
 	def name(self):
 		return self.client_fk.name
 
@@ -37,17 +31,11 @@ class Credit(CommonInfo):
 		payment = Payment.objects.filter(credit_fk=self.id).aggregate(total=Sum(F('amount')))
 		return payment['total'] if payment['total'] is not None else 0.0
 
-	def __str__(self):
-		return '{}, {}'.format(self.client_fk.name, 'Credit')
-
 class Payment(CommonInfo):
 	credit_fk = models.ForeignKey(Credit,verbose_name='Credit')
 
 	def name(self):
 		return self.credit_fk.client_fk.name
-
-	def __str__(self):
-		return '{}, {}'.format(self.credit_fk.client_fk.name, 'Payment')
 
 	def total(self):
 		return self.amount + self.interest

@@ -12,6 +12,21 @@ page_count = 10
 def error_404(request):
 	return render(request,'lendingapp/404.html',{})
 
+def paginators(request,obj):
+	paginator = Paginator(obj,page_count)
+	page = request.GET.get('page')
+
+	try:
+		obj_list = paginator.page(page)
+	except PageNotAnInteger:
+		obj_list = paginator.page(1)
+		page = 1
+	except EmptyPage:
+		obj_list = paginator.page(paginator.num_pages)
+
+	return {'obj_list':obj_list,'page':page}
+
+
 ##############INDEX#########################
 @login_required
 def index(request):
@@ -20,42 +35,25 @@ def index(request):
 	ledger = models.Ledger.objects.values('id','amount','interest','dt','remarks','category')
 	summary_list = ledger.union(credits,payments,all=True)
 
-	credit_sum = credits.aggregate(total=Sum('amount'))
-	payment_sum = payments.aggregate(total=Sum('amount'))
-	ledger_in = ledger.filter(category='Misc In').aggregate(total=Sum('amount'))
-	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(total=Sum('amount'))
+	summary = paginators(request,summary_list)
+
+	credit_sum = credits.aggregate(Credit=Sum('amount'))
+	payment_sum = payments.aggregate(Payment=Sum('amount'))
+	ledger_in = ledger.filter(category='Misc In').aggregate(LedgerIn=Sum('amount'))
+	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(LedgerIn=Sum('amount'))
 
 	totals = [credit_sum,payment_sum,ledger_in,ledger_out]
 
-	paginator = Paginator(summary_list,page_count)
-	page = request.GET.get('page')
-
-	try:
-		summary = paginator.page(page)
-	except PageNotAnInteger:
-		summary = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		summary = paginator.page(paginator.num_pages)
-
-	return render(request,'lendingapp/index.html',{'summary':summary,'page':int(page),'totals':totals})
+	return render(request,'lendingapp/index.html',{'summary':summary['obj_list'],'page':int(summary['page']),'totals':totals})
 
 ##############CLIENT#########################
 @login_required
 def client(request):
-	client_list = models.Client.objects.order_by('name').all()
-	paginator = Paginator(client_list,page_count)
-	page = request.GET.get('page')
+	client_list = models.Payment.objects.prefetch_related('credit_fk__client_fk')
 
-	try:
-		clients = paginator.page(page)
-	except PageNotAnInteger:
-		clients = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		clients = paginator.page(paginator.num_pages)
+	clients = paginators(request,client_list)
 
-	return render(request,'lendingapp/client.html',{'clients':clients,'page':int(page)})
+	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 
 @login_required
 def client_add(request):

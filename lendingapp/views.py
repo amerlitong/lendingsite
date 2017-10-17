@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -11,6 +11,20 @@ page_count = 10
 
 def error_404(request):
 	return render(request,'lendingapp/404.html',{})
+
+def paginators(request,objs):
+	paginator = Paginator(objs,page_count)
+	page = request.GET.get('page')
+	
+	try:
+		pages = paginator.page(page)
+	except PageNotAnInteger:
+		pages = paginator.page(1)
+		page = 1
+	except EmptyPage:
+		pages = paginator.page(paginator.num_pages)
+
+	return {'pages':pages,'page':page}
 
 ##############INDEX#########################
 @login_required
@@ -152,20 +166,11 @@ def credit_del(request,id):
 ##############PAYMENT#########################
 @login_required
 def payment(request,client_id):
-	client = get_object_or_404(models.Client,pk=client_id)
-	payments_list = models.Payment.objects.filter(credit_fk__client_fk_id=client_id)
-	paginator = Paginator(payments_list,page_count)
-	page = request.GET.get('page')
+	payment_list = models.Payment.objects.select_related('credit_fk__client_fk')
 	
-	try:
-		payments = paginator.page(page)
-	except PageNotAnInteger:
-		payments = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		payments = paginator.page(paginator.num_pages)
+	payments = paginators(request,payment_list)
 
-	return render(request,'lendingapp/payment.html',{'payments':payments,'client':client.name,'page':int(page)})
+	return render(request,'lendingapp/payment.html',{'payments':payments['pages'],'client':payment_list[0].name,'page':int(payments['page'])})
 
 @login_required
 def payment_add(request,credit_id):

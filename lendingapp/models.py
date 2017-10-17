@@ -46,8 +46,8 @@ class Payment(CommonInfo):
 	def name(self):
 		return self.credit_fk.client_fk.name
 
-	def __str__(self):
-		return '{}, {}'.format(self.credit_fk.client_fk.name, 'Payment')
+	# def __str__(self):
+	# 	return '{}, {}'.format(self.credit_fk.client_fk.name, 'Payment')
 
 	def total(self):
 		return self.amount + self.interest

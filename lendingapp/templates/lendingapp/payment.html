@@ -24,7 +24,7 @@
 					<td>{{ payment.remarks }}</td>
 					<td>
 						<a href="{% url 'payment_edit' payment.id %}">Edit</a> ,
-						<a href="{% url 'payment_del' payment.id %}">Delete</a> ,
+						<a href="{% url 'payment_del' payment.id %}">Delete</a>
 					</td>
 				</tr>
 			{% endfor %}

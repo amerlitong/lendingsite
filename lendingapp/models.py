@@ -13,13 +13,13 @@ class Client(models.Model):
 	mobile = models.CharField(max_length=50,blank=True)
 	remarks = models.TextField(null=False,blank=True)
 
-	def credits(self):
-		credit = Credit.objects.filter(client_fk=self.id).aggregate(Sum('amount'))
-		return credit['amount__sum'] if credit['amount__sum'] is not None else 0.0
+	# def credits(self):
+	# 	credit = Credit.objects.filter(client_fk=self.id).aggregate(Sum('amount'))
+	# 	return credit['amount__sum'] if credit['amount__sum'] is not None else 0.0
 
-	def payments(self):
-		payment = Payment.objects.filter(credit_fk__client_fk=self.id).aggregate(total=Sum(F('amount')))
-		return payment['total'] if payment['total'] is not None else 0.0
+	# def payments(self):
+	# 	payment = Payment.objects.filter(credit_fk__client_fk=self.id).aggregate(total=Sum(F('amount')))
+	# 	return payment['total'] if payment['total'] is not None else 0.0
 
 class Credit(CommonInfo):
 	client_fk = models.ForeignKey(Client,verbose_name='Client')
@@ -27,9 +27,9 @@ class Credit(CommonInfo):
 	def name(self):
 		return self.client_fk.name
 
-	def payments(self):
-		payment = Payment.objects.filter(credit_fk=self.id).aggregate(total=Sum(F('amount')))
-		return payment['total'] if payment['total'] is not None else 0.0
+	# def payments(self):
+	# 	payment = Payment.objects.filter(credit_fk=self.id).aggregate(total=Sum(F('amount')))
+	# 	return payment['total'] if payment['total'] is not None else 0.0
 
 class Payment(CommonInfo):
 	credit_fk = models.ForeignKey(Credit,verbose_name='Credit')
@@ -37,12 +37,6 @@ class Payment(CommonInfo):
 	def name(self):
 		return self.credit_fk.client_fk.name
 
-<<<<<<< HEAD
-	# def __str__(self):
-	# 	return '{}, {}'.format(self.credit_fk.client_fk.name, 'Payment')
-
-=======
->>>>>>> a605ec74b8b597c596932d048696d934fdad454e
 	def total(self):
 		return self.amount + self.interest
 		

@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, get_list_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -12,21 +12,6 @@ page_count = 10
 def error_404(request):
 	return render(request,'lendingapp/404.html',{})
 
-<<<<<<< HEAD
-def paginators(request,objs):
-	paginator = Paginator(objs,page_count)
-	page = request.GET.get('page')
-	
-	try:
-		pages = paginator.page(page)
-	except PageNotAnInteger:
-		pages = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		pages = paginator.page(paginator.num_pages)
-
-	return {'pages':pages,'page':page}
-=======
 def paginators(request,obj):
 	paginator = Paginator(obj,page_count)
 	page = request.GET.get('page')
@@ -40,8 +25,6 @@ def paginators(request,obj):
 		obj_list = paginator.page(paginator.num_pages)
 
 	return {'obj_list':obj_list,'page':page}
-
->>>>>>> a605ec74b8b597c596932d048696d934fdad454e
 
 ##############INDEX#########################
 @login_required
@@ -65,7 +48,7 @@ def index(request):
 ##############CLIENT#########################
 @login_required
 def client(request):
-	client_list = models.Payment.objects.prefetch_related('credit_fk__client_fk')
+	client_list = models.Client.objects.prefetch_related('credit_set__payment_set').annotate(credits=Sum('credit__amount'),payments=Sum('credit__payment__amount'))
 
 	clients = paginators(request,client_list)
 
@@ -110,18 +93,10 @@ def client_del(request,id):
 def credit(request,client_id):
 	client = get_object_or_404(models.Client,pk=client_id)
 	credit_list = models.Credit.objects.filter(client_fk_id=client_id)
-	paginator = Paginator(credit_list,page_count)
-	page = request.GET.get('page')
 	
-	try:
-		credits = paginator.page(page)
-	except PageNotAnInteger:
-		credits = paginator.page(1)
-		page = 1
-	except EmptyPage:
-		credits = paginator.page(paginator.num_pages)
+	credits = paginators(request,credit_list)
 
-	return render(request,'lendingapp/credit.html',{'credits':credits,'client':client.name,'page':int(page)})
+	return render(request,'lendingapp/credit.html',{'credits':credits['obj_list'],'client':client.name,'page':int(credits['page'])})
 
 @login_required
 def credit_add(request,client_id):
@@ -170,7 +145,7 @@ def payment(request,client_id):
 	
 	payments = paginators(request,payment_list)
 
-	return render(request,'lendingapp/payment.html',{'payments':payments['pages'],'client':payment_list[0].name,'page':int(payments['page'])})
+	return render(request,'lendingapp/payment.html',{'payments':payments['obj_list'],'client':payment_list[0].name,'page':int(payments['page'])})
 
 @login_required
 def payment_add(request,credit_id):

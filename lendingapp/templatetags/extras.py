@@ -8,7 +8,10 @@ def percent(value):
 
 @register.filter
 def sub(value,arg):
-	return value - arg
+	if arg:
+		return value - arg
+	else:
+		return value
 
 @register.filter
 def inlist(value,lst):

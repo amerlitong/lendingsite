@@ -26,12 +26,12 @@
 					<td>{{ client.name }}</a></td>
 					<td>{{ client.address }}</td>
 					<td>{{ client.mobile }}</td>
-					<td>{{ client.remarks }}</td>
+					<td>{{ client.remarks  }}</td>
 					<td><a href="{% url 'credit' client.id  %}">{{ client.credits }}</a></td>
-					<td><a href="{% url 'payment' client.id  %}">{{ client.payments }}</a></td>
+					<td><a href="{% url 'payment' client.id  %}">{{ client.payments|default:0.0 }}</a></td>
 					<td>{{ client.credits|sub:client.payments }}</td>
 					<td>
-						<a href="{% url 'credit_add' client.id  %}">Add Credit</a> ,
+						<a href="{% url 'credit_add' client.id %}">Add Credit</a> ,
 						<a href="{% url 'client_edit' client.id  %}">Edit</a> ,
 						<a href="{% url 'client_del' client.id  %}">Delete</a>
 					</td>

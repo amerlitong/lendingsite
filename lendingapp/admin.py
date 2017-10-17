@@ -16,14 +16,14 @@ def export_actions(modeladmin,request,queryset):
 export_actions.short_description = 'Export to CSV'
 
 class ClientAdmin(admin.ModelAdmin):
-	list_display = ['name','address','mobile','credits','payments','remarks']
+	list_display = ['name','address','mobile','remarks']
 	search_fields = ['name']
 	list_per_page = 20
 	ordering = ['name']
 	actions = [export_actions]
 
 class CreditAdmin(admin.ModelAdmin):
-	list_display = ['name','amount','interest','dt','payments','remarks']
+	list_display = ['name','amount','interest','dt','remarks']
 	search_fields = ['client_fk__name']
 
 class PaymentAdmin(admin.ModelAdmin):

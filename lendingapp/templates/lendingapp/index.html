@@ -40,12 +40,18 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for total in totals  %}
+			{% for total in totals %}
 				<tr>
-					<td>{{ total.total }}</td>
-					<td>{{ total.total }}</td>
+					{% for k,v in total.items %}
+						<td>{{ k }}</td>
+						<td>{{ v }}</td>
+					{% endfor %}				
 				</tr>
 			{% endfor %}
+				<tr>
+					<td>CASH ON HAND</td>
+					<td>{{ total.values }}</td>
+				</tr>
 		</tbody>
 	</table>
 {% endblock %}

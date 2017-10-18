@@ -4,7 +4,7 @@
 	<title>Add/Edit Credit</title>
 {% endblock %}
 {% block content %}
-<h2>Add/Edit Credit for {{ client.name }}</h2>
+<h2>Add/Edit Credit for {{ client }}</h2>
 	<form action="" method="POST">
 		{% csrf_token %}
 		{{ form.as_p }}

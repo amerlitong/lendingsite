@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -29,29 +29,25 @@ def paginators(request,obj):
 ##############INDEX#########################
 @login_required
 def index(request):
-	credits = models.Credit.objects.annotate(cat=Value('Credit',output_field=CharField())).select_related('client_fk').values('id','amount','interest','dt','cat','client_fk__name')
-	payments = models.Payment.objects.annotate(cat=Value('Payment',output_field=CharField())).select_related('credit_fk__client_fk').values('id','amount','interest','dt','cat','credit_fk__client_fk__name')
+	clients = models.Client.objects.prefetch_related('credit_set__payment_set')
+	credits = clients.filter(credit__id__isnull=False).annotate(cat=Value('Credit',output_field=CharField())).values('credit__id','credit__amount','credit__interest','credit__dt','name','cat')
+	payments = clients.filter(credit__payment__id__isnull=False).annotate(cat=Value('Payment',output_field=CharField()))
+	payments = payments.values('credit__payment__id','credit__payment__amount','credit__payment__interest','credit__payment__dt','name','cat')
 	ledger = models.Ledger.objects.values('id','amount','interest','dt','remarks','category')
-	summary_list = ledger.union(credits,payments,all=True)
-
+	summary_list = ledger.union(credits,payments,all=True).order_by('-dt')
 	summary = paginators(request,summary_list)
-
-	credit_sum = credits.aggregate(Credit=Sum('amount'))
-	payment_sum = payments.aggregate(Payment=Sum('amount'))
+	credit_sum = credits.aggregate(Credit=Sum('credit__amount'))
+	payment_sum = payments.aggregate(Payment=Sum('credit__payment__amount'))
 	ledger_in = ledger.filter(category='Misc In').aggregate(LedgerIn=Sum('amount'))
 	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(LedgerIn=Sum('amount'))
-
 	totals = [credit_sum,payment_sum,ledger_in,ledger_out]
-
 	return render(request,'lendingapp/index.html',{'summary':summary['obj_list'],'page':int(summary['page']),'totals':totals})
 
 ##############CLIENT#########################
 @login_required
 def client(request):
 	client_list = models.Client.objects.prefetch_related('credit_set__payment_set').annotate(credits=Sum('credit__amount'),payments=Sum('credit__payment__amount'))
-
 	clients = paginators(request,client_list)
-
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 
 @login_required
@@ -91,12 +87,9 @@ def client_del(request,id):
 ##############CREDIT#########################
 @login_required
 def credit(request,client_id):
-	client = get_object_or_404(models.Client,pk=client_id)
-	credit_list = models.Credit.objects.filter(client_fk_id=client_id)
-	
+	credit_list = get_list_or_404(models.Credit.objects.filter(client_fk_id=client_id).prefetch_related('payment_set').annotate(payments=Sum('payment__amount')))
 	credits = paginators(request,credit_list)
-
-	return render(request,'lendingapp/credit.html',{'credits':credits['obj_list'],'client':client.name,'page':int(credits['page'])})
+	return render(request,'lendingapp/credit.html',{'credits':credits['obj_list'],'client':credit_list[0].client_fk.name,'page':int(credits['page'])})
 
 @login_required
 def credit_add(request,client_id):
@@ -110,7 +103,7 @@ def credit_add(request,client_id):
 			f.save()
 			messages.success(request,'Client added successfully!')
 			return HttpResponseRedirect(reverse('client'))
-	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':client})
+	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':client.name})
 
 @login_required
 def credit_edit(request,id):
@@ -141,16 +134,17 @@ def credit_del(request,id):
 ##############PAYMENT#########################
 @login_required
 def payment(request,client_id):
-	payment_list = models.Payment.objects.select_related('credit_fk__client_fk')
-	
+	payment_list = models.Payment.objects.select_related('credit_fk__client_fk').filter(credit_fk__client_fk_id=client_id)
 	payments = paginators(request,payment_list)
-
-	return render(request,'lendingapp/payment.html',{'payments':payments['obj_list'],'client':payment_list[0].name,'page':int(payments['page'])})
+	return render(request,'lendingapp/payment.html',{'payments':payments['obj_list'],'client':payment_list[0].credit_fk.client_fk.name,'page':int(payments['page'])})
 
 @login_required
 def payment_add(request,credit_id):
-	credit = get_object_or_404(models.Credit,pk=credit_id)
-	balance = credit.amount - credit.payments()
+	credit = get_object_or_404(models.Credit.objects.prefetch_related('payment_set').annotate(payments=Sum('payment__amount')),pk=credit_id)
+	if credit.payments:
+		balance = credit.amount - credit.payments
+	else:
+		balance = credit.amount	
 	form = forms.PaymentForm(initial={'interest':balance * credit.interest})
 	if request.method == "POST":
 		form = forms.PaymentForm(request.POST)

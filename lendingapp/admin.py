@@ -23,11 +23,11 @@ class ClientAdmin(admin.ModelAdmin):
 	actions = [export_actions]
 
 class CreditAdmin(admin.ModelAdmin):
-	list_display = ['name','amount','interest','dt','remarks']
+	list_display = ['amount','interest','dt','remarks']
 	search_fields = ['client_fk__name']
 
 class PaymentAdmin(admin.ModelAdmin):
-	list_display = ['name','amount','interest','total','dt','remarks']
+	list_display = ['amount','interest','dt','remarks']
 	search_fields = ['credit_fk__client_fk__name']
 
 class LedgerAdmin(admin.ModelAdmin):

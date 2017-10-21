@@ -23,7 +23,7 @@
 					<td>{{ credit.amount }}</td>
 					<td>{{ credit.interest|percent }}</td>
 					<td>{{ credit.dt }}</td>
-					<td>{{ credit.payments }}</td>
+					<td>{{ credit.payments|default:0.0 }}</td>
 					<td>{{ credit.amount|sub:credit.payments }}</td>
 					<td>{{ credit.remarks }}</td>
 					<td>

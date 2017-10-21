@@ -28,7 +28,7 @@ class ClientForm(BaseForm):
 class CreditForm(BaseForm):
 	class Meta:
 		model = Credit
-		exclude = ['client_fk']
+		exclude = ['clientfk']
 		widgets = {
 			'dt':DateInput(attrs={'type':'date','value':date.today()}),
 		}
@@ -36,7 +36,7 @@ class CreditForm(BaseForm):
 class PaymentForm(BaseForm):
 	class Meta:
 		model = Payment
-		exclude = ['credit_fk']
+		exclude = ['creditfk','clientfk']
 		widgets = {
 			'dt':DateInput(attrs={'type':'date','value':date.today()}),
 		}

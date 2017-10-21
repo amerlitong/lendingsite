@@ -46,7 +46,7 @@ def index(request):
 ##############CLIENT#########################
 @login_required
 def client(request):
-	client_list = models.Client.objects.prefetch_related('credit_set__payment_set').annotate(credits=Sum('credit__amount'),payments=Sum('credit__payment__amount'))
+	client_list = models.Client.objects.prefetch_related().annotate(credits=Sum('credit__amount')).values('id').annotate(payments=Sum('credit__payment__amount'))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 

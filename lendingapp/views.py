@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import CharField, Value, Sum, Q
+from django.db.models.expressions import RawSQL
 from . import models, forms
 
 page_count = 10
@@ -46,7 +47,14 @@ def index(request):
 ##############CLIENT#########################
 @login_required
 def client(request):
-	client_list = models.Client.objects.prefetch_related('credit_set__payment_set').annotate(credits=Sum('credit__amount')).annotate(payments=Sum('credit__payment__amount'))
+	sql = """
+		SELECT SUM(cr.amount) 
+		FROM lendingapp_client cl 
+		INNER JOIN lendingapp_credit cr on cl.id = cr.clientfk_id 
+		WHERE cl.id = %s	
+	"""
+	param =  "(%s)" % ",".join([str(g.id) for g in models.Client.objects.all()])
+	client_list = models.Client.objects.prefetch_related('payment_set').annotate(payments=Sum('payment__amount'),credits=RawSQL(sql,param))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 

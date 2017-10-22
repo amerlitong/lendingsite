@@ -48,13 +48,14 @@ def index(request):
 @login_required
 def client(request):
 	sql = """
-		SELECT SUM(cr.amount) 
-		FROM lendingapp_client cl 
-		INNER JOIN lendingapp_credit cr on cl.id = cr.clientfk_id 
-		WHERE cl.id = %s	
+		SELECT SUM(lendingapp_credit.amount) 
+		FROM lendingapp_client
+		INNER JOIN lendingapp_credit on lendingapp_client.id = lendingapp_credit.clientfk_id
+		GROUP BY lendingapp_client.id 
+		HAVING lendingapp_client.id IN %s
 	"""
-	param =  "(%s)" % ",".join([str(g.id) for g in models.Client.objects.all()])
-	client_list = models.Client.objects.prefetch_related('payment_set').annotate(payments=Sum('payment__amount'),credits=RawSQL(sql,param))
+	params = (str(1),str(2))
+	client_list = models.Client.objects.prefetch_related('payment_set').annotate(payments=Sum('payment__amount'),credits=RawSQL(sql,params))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 

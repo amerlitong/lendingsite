@@ -4,8 +4,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import CharField, Value, Sum, Q
-from django.db.models.expressions import RawSQL
+from django.db.models import CharField, Value, Sum, Q, OuterRef, Subquery
 from . import models, forms
 
 page_count = 10
@@ -30,32 +29,25 @@ def paginators(request,obj):
 ##############INDEX#########################
 @login_required
 def index(request):
-	clients = models.Client.objects.prefetch_related('credit_set','payment_set')
-	credits = clients.annotate(cat=Value('Credit',output_field=CharField())).values('credit__id','credit__amount','credit__dt','name','cat')
-	payments = clients.annotate(cat=Value('Payment',output_field=CharField()))
-	payments = payments.values('payment__id','payment__amount','payment__dt','name','cat')
+	credits = models.Credit.objects.select_related('clientfk').annotate(cat=Value('Credit',output_field=CharField())).values('id','amount','dt','clientfk__name','cat')
+	payments = models.Payment.objects.select_related('clientfk').annotate(cat=Value('Payment',output_field=CharField())).values('id','amount','dt','clientfk__name','cat')
 	ledger = models.Ledger.objects.values('id','amount','dt','remarks','category')
 	summary_list = ledger.union(credits,payments,all=True).order_by('-dt')
 	summary = paginators(request,summary_list)
-	credit_sum = credits.aggregate(Credit=Sum('credit__amount'))
-	payment_sum = payments.aggregate(Payment=Sum('payment__amount'))
+	credit_sum = credits.aggregate(Credit=Sum('amount'))
+	payment_sum = payments.aggregate(Payment=Sum('amount'))
 	ledger_in = ledger.filter(category='Misc In').aggregate(LedgerIn=Sum('amount'))
-	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(LedgerIn=Sum('amount'))
+	ledger_out = ledger.filter(Q(category='Misc Out') | Q(category='Remit')).aggregate(LedgerOut=Sum('amount'))
 	totals = [credit_sum,payment_sum,ledger_in,ledger_out]
-	return render(request,'lendingapp/index.html',{'summary':summary['obj_list'],'page':int(summary['page']),'totals':totals})
+	cash = (totals[1]['Payment']+totals[2]['LedgerIn']) - (totals[0]['Credit']+totals[3]['LedgerOut'])
+	return render(request,'lendingapp/index.html',{'summary':summary['obj_list'],'page':int(summary['page']),'totals':totals, 'cash':cash})
 
 ##############CLIENT#########################
 @login_required
 def client(request):
-	sql = """
-		SELECT SUM(lendingapp_credit.amount) 
-		FROM lendingapp_client
-		INNER JOIN lendingapp_credit on lendingapp_client.id = lendingapp_credit.clientfk_id
-		GROUP BY lendingapp_client.id 
-		HAVING lendingapp_client.id IN %s
-	"""
-	params = (str(1),str(2))
-	client_list = models.Client.objects.prefetch_related('payment_set').annotate(payments=Sum('payment__amount'),credits=RawSQL(sql,params))
+	credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
+	sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
+	client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page'])})
 
@@ -122,10 +114,10 @@ def credit_edit(request,id):
 		form = forms.CreditForm(instance=credit, data=request.POST)
 		if form.is_valid():
 			f = form.save(commit=False)
-			f.clientfk = credit.client
+			f.clientfk = credit.clientfk
 			f.save()
-			return HttpResponseRedirect(reverse('credit',args=(credit.client.id,)))
-	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':credit.client.name})
+			return HttpResponseRedirect(reverse('credit',args=(credit.clientfk.id,)))
+	return render(request,'lendingapp/credit_form.html',{'form':form, 'client':credit.clientfk.name})
 
 @login_required
 def credit_del(request,id):
@@ -134,16 +126,16 @@ def credit_del(request,id):
 	if payment.count() == 0:
 		credit.delete()
 		messages.success(request,'Credit deleted successfully!')
-		return HttpResponseRedirect(reverse('credit',args=(credit.client.id,)))
+		return HttpResponseRedirect(reverse('credit',args=(credit.clientfk.id,)))
 	else:
 		messages.warning(request,'Cannot be deleted, Payment(s) available!')
-		return HttpResponseRedirect(reverse('credit',args=(credit.client.id,)))	
-	return HttpResponseRedirect(reverse('credit',args=(credit.client.id,)))
+		return HttpResponseRedirect(reverse('credit',args=(credit.clientfk.id,)))	
+	return HttpResponseRedirect(reverse('credit',args=(credit.clientfk.id,)))
 
 ##############PAYMENT#########################
 @login_required
 def payment(request,client_id):
-	payment_list = models.Payment.objects.filter(clientfk=client_id)
+	payment_list = get_list_or_404(models.Payment.objects.filter(clientfk=client_id))
 	payments = paginators(request,payment_list)
 	return render(request,'lendingapp/payment.html',{'payments':payments['obj_list'],'client':payment_list[0].clientfk.name,'page':int(payments['page'])})
 
@@ -168,23 +160,23 @@ def payment_add(request,credit_id):
 @login_required
 def payment_edit(request,id):
 	payment = get_object_or_404(models.Payment,pk=id)
-	balance = payment.credit.amount - payment.amount
+	balance = payment.creditfk.amount - payment.amount
 	form = forms.PaymentForm(instance=payment)
 	if request.method == "POST":
 		form = forms.PaymentForm(instance=payment, data=request.POST)
 		if form.is_valid():
 			f = form.save(commit=False)
-			f.creditfk = payment.credit
-			f.clientfk = credit.clientfk
+			f.creditfk = payment.creditfk
+			f.clientfk = payment.clientfk
 			f.save()
-			return HttpResponseRedirect(reverse('payment',args=(payment.credit.client.id,)))
-	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':payment.client.name,'balance':balance})
+			return HttpResponseRedirect(reverse('payment',args=(payment.clientfk.id,)))
+	return render(request, 'lendingapp/payment_form.html',{'form':form,'client':payment.clientfk.name,'balance':balance})
 
 @login_required
 def payment_del(request,id):
 	payment = get_object_or_404(models.Payment,pk=id)
 	payment.delete()
-	return HttpResponseRedirect(reverse('payment',args=(payment.credit.client.id,)))
+	return HttpResponseRedirect(reverse('payment',args=(payment.clientfk.id,)))
 
 ##############LEDGER#########################
 @login_required

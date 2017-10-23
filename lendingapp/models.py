@@ -28,5 +28,6 @@ class Ledger(CommonInfo):
 		('Misc In','Misc In'),
 		('Misc Out','Misc Out')
 	]
+	interest = models.FloatField(null=True)
 	category = models.CharField(max_length=10,choices=cats)
 	bank = models.CharField(max_length=10,choices=[('bdo','BDO'),('bpi','BPI')],blank=True)

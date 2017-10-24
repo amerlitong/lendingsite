@@ -1,8 +1,8 @@
-from django.forms import ModelForm, Select, DateInput
+from django import forms
 from datetime import date
-from .models import Client, Credit, Payment, Ledger
+from . import models
 
-class BaseForm(ModelForm):
+class BaseForm(forms.ModelForm):
 	def __init__(self,*args,**kwargs):
 		super(BaseForm,self).__init__(*args,**kwargs)
 		for field in iter(self.fields):
@@ -22,31 +22,34 @@ class BaseForm(ModelForm):
 
 class ClientForm(BaseForm):
 	class Meta:
-		model = Client
+		model = models.Client
 		fields = '__all__'
 
 class CreditForm(BaseForm):
 	class Meta:
-		model = Credit
+		model = models.Credit
 		exclude = ['clientfk']
 		widgets = {
-			'dt':DateInput(attrs={'type':'date','value':date.today()}),
+			'dt':forms.DateInput(attrs={'type':'date','value':date.today()}),
 		}
 
 class PaymentForm(BaseForm):
 	class Meta:
-		model = Payment
+		model = models.Payment
 		exclude = ['creditfk','clientfk']
 		widgets = {
-			'dt':DateInput(attrs={'type':'date','value':date.today()}),
+			'dt':forms.DateInput(attrs={'type':'date','value':date.today()}),
 		}
 
 class LedgerForm(BaseForm):
 	class Meta:
-		model = Ledger
+		model = models.Ledger
 		fields = ['amount','dt','remarks','category','bank']
 		widgets = {
-			'dt':DateInput(attrs={'type':'date','value':date.today()}),
-			'category': Select(),
-			'bank': Select(),
+			'dt':forms.DateInput(attrs={'type':'date','value':date.today()}),
+			'category': forms.Select(),
+			'bank': forms.Select(),
 		}
+
+class SearchForm(forms.Form):
+	name = forms.CharField(max_length=50,label="Name",required=True)

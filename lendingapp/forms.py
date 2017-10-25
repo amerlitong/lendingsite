@@ -52,4 +52,4 @@ class LedgerForm(BaseForm):
 		}
 
 class SearchForm(forms.Form):
-	name = forms.CharField(max_length=50,label="Name",required=True)
+	name = forms.CharField(max_length=50,required=True)

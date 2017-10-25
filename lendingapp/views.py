@@ -44,16 +44,17 @@ def index(request):
 
 ##############CLIENT#########################
 @login_required
-def client(request,id=None):
+def client(request):
 	form = forms.SearchForm()
+	credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
+	sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
 	if request.method == 'POST':
 		form = forms.SearchForm(request.POST)
 		if form.is_valid():
-			pass
-		else:
-			credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
-	sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
-	client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
+			name = form.cleaned_data['name']
+			client_list = models.Client.objects.filter(name__icontains=name).annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
+	else:	
+		client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page']),'form':form})
 

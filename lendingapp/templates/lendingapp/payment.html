@@ -5,20 +5,20 @@
 {% endblock %}
 {% block content %}
 <h2>Payments for {{ client }}</h2>
-	<table class="table table-responsive table-striped table-bordered table-sm">
+	<table class="table table-responsive table-hover">
 		<thead>
 			<tr>
-				<th>AMOUNT</th>
-				<th>INTEREST</th>
-				<th>DATE</th>
-				<th>REMARKS</th>
-				<th>ACTIONS</th>
+				<th scope="col">AMOUNT</th>
+				<th scope="col">INTEREST</th>
+				<th scope="col">DATE</th>
+				<th scope="col">REMARKS</th>
+				<th scope="col">ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for payment in payments %}
 				<tr>
-					<td>{{ payment.amount }}</td>
+					<th scope="row">{{ payment.amount }}</th>
 					<td>{{ payment.interest }}</td>
 					<td>{{ payment.dt }}</td>
 					<td>{{ payment.remarks }}</td>

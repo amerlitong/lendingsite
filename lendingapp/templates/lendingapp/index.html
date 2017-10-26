@@ -1,21 +1,21 @@
 {% extends "lendingapp/base.html" %}
 {% block title %}<title>Index</title>{% endblock %}
 {% block content %}
-<h2>Summary</h2>
-	<table class="table table-responsive table-striped table-bordered table-sm">
+<h2>Ledger</h2>
+	<table class="table table-responsive table-hover">
 		<thead>
 			<tr>
-				<th>AMOUNT</th>
-				<th>DATE</th>
-				<th>CATEGORY</th>
-				<th>REMARKS</th>
-				<th>ACTIONS</th>
+				<th scope="col">AMOUNT</th>
+				<th scope="col">DATE</th>
+				<th scope="col">CATEGORY</th>
+				<th scope="col">REMARKS</th>
+				<th scope="col">ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for summ in summary %}
 				<tr>
-					<td>{{ summ.amount }}</td>
+					<th scope="row">{{ summ.amount }}</th>
 					<td>{{ summ.dt }}</td>
 					<td>{{ summ.category }}</td>
 					<td>{{ summ.remarks}}</td>
@@ -32,26 +32,31 @@
 		</tbody>
 	</table>
 	{% include "lendingapp/pagination_snippet.html" with model=summary page=page %}
-	<table class="table table-responsive table-striped table-bordered table-sm">
-		<thead>
-			<tr>
-				<th>CATEGORY</th>
-				<th>AMOUNT</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for total in totals %}
-				<tr>
-					{% for k,v in total.items %}
-						<td>{{ k }}</td>
-						<td>{{ v|default:0.0 }}</td>
+	<h2>Summary</h2>
+	<div class="row">
+		<div class="col-md-4">
+			<table class="table table-responsive table-hover">
+				<thead>
+					<tr>
+						<th scope="col">CATEGORY</th>
+						<th scope="col">AMOUNT</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for total in totals %}
+						<tr>
+							{% for k,v in total.items %}
+								<th scope="row">{{ k }}</th>
+								<td>{{ v|default:0.0 }}</td>
+							{% endfor %}
+						</tr>
 					{% endfor %}
-				</tr>
-			{% endfor %}
-				<tr>
-					<td>CASH ON HAND</td>
-					<td>{{ cash }}</td>
-				</tr>
-		</tbody>
-	</table>
+						<tr>
+							<th scope="row">CASH ON HAND</td>
+							<td>{{ cash }}</td>
+						</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 {% endblock %}

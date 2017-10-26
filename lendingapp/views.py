@@ -48,7 +48,7 @@ def client(request):
 	form = forms.SearchForm()
 	credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
 	sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
-	if request.method == 'POST':
+	if request.method == 'POST' and 'search' in request.POST:
 		form = forms.SearchForm(request.POST)
 		if form.is_valid():
 			name = form.cleaned_data['name']

@@ -1,31 +1,33 @@
 {% extends "../lendingapp/base.html" %}
 {% block content %}
-    <form class="form-signin" method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-        <div class="form-group">
-            {% if form.errors %}
-                <div class="alert alert-danger">Your username and password didn't match. Please try again.</div>
-            {% endif %}
-            {% if next %}
-                {% if user.is_authenticated %}
-                    <div class="alert alert-info">Your account doesn't have access to this page. To proceed,
-                    please login with an account that has access.</div>
-                {% else %}
-                    <div class="alert alert-warning">Please login to see this page.</div>
-                {% endif %}        
-            {% endif %}  
-        </div>
-        <h2 class="form-signin-heading">Please Log In</h2>
-            <label for="username" class="sr-only">{{ form.username.label_tag}}</label>
-            <input type="text" id="username" class="form-control" placeholder="Username" name="{{form.username.name}}" required autofocus>
-            <label for="password" class="sr-only">{{ form.password.label_tag}}</label>
-            <input type="password" id="password" class="form-control" placeholder="Password" name="{{form.password.name}}" required>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" value="remember-me"> Remember me
-              </label>
+<div class="row justify-content-md-center">
+    <div class="col-md-6 centered">
+        <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+            <div class="form-group">
+                {% if form.errors %}
+                    <div class="alert alert-danger">Your username and password didn't match. Please try again.</div>
+                {% endif %}
+                {% if next %}
+                    {% if user.is_authenticated %}
+                        <div class="alert alert-info">Your account doesn't have access to this page. To proceed,
+                        please login with an account that has access.</div>
+                    {% else %}
+                        <div class="alert alert-warning">Please login to see this page.</div>
+                    {% endif %}        
+                {% endif %}  
             </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit" value="login">Log In</button>
-        <input type="hidden" name="next" value="{{ next }}" />
-    </form>
+            <h2 class="form-signin-heading">Please Log In</h2>
+                <input type="text" id="username" class="form-control form-control-lg" placeholder="Username" name="{{form.username.name}}" required autofocus>
+                <input type="password" id="password" class="form-control form-control-lg mt-2" placeholder="Password" name="{{form.password.name}}" required>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="remember-me"> Remember me
+                  </label>
+                </div>
+            <button class="form-control btn btn-primary btn-lg" type="submit" value="login">Log In</button>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+    </div>
+</div>
 {% endblock %}

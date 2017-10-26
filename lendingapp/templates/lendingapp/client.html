@@ -5,33 +5,30 @@
 {% endblock %}
 {% block content %}
 <h2>Clients</h2>
-	<div class="row">
-		<div class="col-md">
-			<form class="form-inline" action="" method="POST">
-				{% csrf_token %}
-				{{ form.name }}
-				<input class="form-control btn btn-primary btn-sm" type="submit" value="Search">
-			</form>
-		</div>
-	</div>
-	<table class="table table-responsive table-striped table-bordered table-sm">
+	<form class="form-inline" action="" method="POST">
+		{% csrf_token %}
+		<input type="text" id="name" class="form-control form-control-lg" placeholder="Name" name="{{form.name.name}}" value="{{ form.name.value|default:"" }}" required autofocus><br>
+		<input class="form-control btn btn-primary btn-lg ml-2" type="submit" value="Search" name="search">
+		<input class="form-control btn btn-primary btn-lg ml-2" type="submit" value="Clear" name="clear">
+	</form>
+	<table class="table table-responsive table-hover">
 		<thead>
 			<tr>
-				<th>ID</th>
-				<th>NAME</th>
-				<th>ADDRESS</th>
-				<th>MOBILE</th>
-				<th>REMARKS</th>
-				<th>CREDITS</th>
-				<th>PAYMENTS</th>
-				<th>BALANCE</th>
-				<th>ACTIONS</th>
+				<th scope="col">ID</th>
+				<th scope="col">NAME</th>
+				<th scope="col">ADDRESS</th>
+				<th scope="col">MOBILE</th>
+				<th scope="col">REMARKS</th>
+				<th scope="col">CREDITS</th>
+				<th scope="col">PAYMENTS</th>
+				<th scope="col">BALANCE</th>
+				<th scope="col">ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for client in clients %}
 				<tr>
-					<td>{{ client.id }}</td>
+					<th  scope="row">{{ client.id }}</th>
 					<td>{{ client.name }}</a></td>
 					<td>{{ client.address }}</td>
 					<td>{{ client.mobile }}</td>

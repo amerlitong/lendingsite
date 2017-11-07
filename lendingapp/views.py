@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
+from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -51,9 +52,11 @@ def client(request):
 	if request.method == 'POST' and 'search' in request.POST:
 		form = forms.SearchForm(request.POST)
 		if form.is_valid():
-			name = form.cleaned_data['name']
+			name = form.cleaned_data['name'].strip()
 			client_list = models.Client.objects.filter(name__icontains=name).annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
-	else:	
+		else:	
+			client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
+	else:
 		client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
 	clients = paginators(request,client_list)
 	return render(request,'lendingapp/client.html',{'clients':clients['obj_list'],'page':int(clients['page']),'form':form})
@@ -67,7 +70,7 @@ def client_add(request):
 			form.save()
 			messages.success(request,'Client added successfully!')
 			return HttpResponseRedirect(reverse('client'))	
-	return render(request,'lendingapp/client_form.html',{'form':form})
+	return JsonResponse({'html_form':render_to_string('lendingapp/client_form.html',{'form':form},)})
 
 @login_required
 def client_edit(request,id):

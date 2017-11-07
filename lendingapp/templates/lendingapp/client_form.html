@@ -1,17 +1,16 @@
-{% extends "lendingapp/base.html" %}
-{% load extras %}
-{% block title %}
-	<title>Add/Edit Client</title>
-{% endblock %}
-{% block content %}
-<h2>Add/Edit Client</h2>
-<div class="row justify-content-md-center">
-	<div class="col-md-6 centered">
-		<form action="" method="POST">
-			{% csrf_token %}
-			{{ form.as_p }}
-			<input class="form-control btn btn-primary  btn-lg" type="submit" value="Add/Save">
-		</form>
-	</div>
-</div>
-{% endblock %}
+<form method="post">
+  {% csrf_token %}
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">Create a new book</h4>
+  </div>
+  <div class="modal-body">
+    {{ form.as_p }}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary" value="Add/Save">Create book</button>
+  </div>
+</form>

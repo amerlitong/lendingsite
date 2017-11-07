@@ -1,10 +1,20 @@
 {% extends "lendingapp/base.html" %}
 {% load extras %}
+{% load static %}
 {% block title %}
 	<title>Clients</title>
 {% endblock %}
+{% block javascript %}
+	 <script src="{% static 'lendingapp/js/client.js' %}"></script>
+{% endblock %}
 {% block content %}
 <h2>Clients</h2>
+<p>
+    <button type="button" class="btn btn-primary js-add-client">
+      <span class="glyphicon glyphicon-plus"></span>
+      New Client
+    </button>
+ </p>
 	<form class="form-inline" action="" method="POST">
 		{% csrf_token %}
 		<input type="text" id="name" class="form-control form-control-lg" placeholder="Name" name="{{form.name.name}}" value="{{ form.name.value|default:"" }}" required autofocus><br>
@@ -46,4 +56,8 @@
 		</tbody>
 	</table>
 	{% include "lendingapp/pagination_snippet.html" with model=clients page=page %}
+	<div class="modal fade" id="modal-book">
+		<div class="modal-dialog">
+      		<div class="modal-content"></div>
+    	</div>
 {% endblock %}

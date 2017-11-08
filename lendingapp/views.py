@@ -63,14 +63,18 @@ def client(request):
 
 @login_required
 def client_add(request):
+	data = dict()
 	form = forms.ClientForm()
 	if request.method == 'POST':
 		form = forms.ClientForm(request.POST)
 		if form.is_valid():
 			form.save()
+			data['form_is_valid'] = True
 			messages.success(request,'Client added successfully!')
-			return HttpResponseRedirect(reverse('client'))	
-	return JsonResponse({'html_form':render_to_string('lendingapp/client_form.html',{'form':form},)})
+		else:
+			data['form_is_valid'] = True
+	data['html_form'] = render_to_string('lendingapp/client_form.html',{'form':form},request=request,)
+	return JsonResponse(data)
 
 @login_required
 def client_edit(request,id):

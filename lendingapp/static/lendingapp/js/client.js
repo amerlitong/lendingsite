@@ -13,3 +13,22 @@ $(function () {
     });
   });
 });
+
+$("#modal-book").on("submit", ".js-add-client-form", function () {
+var form = $(this);
+$.ajax({
+  url: form.attr("action"),
+  data: form.serialize(),
+  type: form.attr("method"),
+  dataType: 'json',
+  success: function (data) {
+    if (data.form_is_valid) {
+      location.href = '/lending/client/'
+    }
+    else {
+      $("#modal-book .modal-content").html(data.html_form);
+    }
+  }
+});
+return false;
+});

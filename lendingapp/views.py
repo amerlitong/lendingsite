@@ -70,9 +70,13 @@ def client_add(request):
 		if form.is_valid():
 			form.save()
 			data['form_is_valid'] = True
-			messages.success(request,'Client added successfully!')
+			credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
+			sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
+			client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
+			clients = paginators(request,client_list)
+			data['html_client_list'] = render_to_string('lendingapp/client_list.html',{'clients':clients['obj_list'], 'page':int(clients['page'])})
 		else:
-			data['form_is_valid'] = True
+			data['form_is_valid'] = False
 	data['html_form'] = render_to_string('lendingapp/client_form.html',{'form':form},request=request,)
 	return JsonResponse(data)
 

@@ -9,19 +9,16 @@
 {% endblock %}
 {% block content %}
 <h2>Clients</h2>
-<p>
-    <button type="button" class="btn btn-primary js-add-client">
-      <span class="glyphicon glyphicon-plus"></span>
-      New Client
-    </button>
- </p>
 	<form class="form-inline" action="" method="POST">
 		{% csrf_token %}
-		<input type="text" id="name" class="form-control form-control-lg" placeholder="Name" name="{{form.name.name}}" value="{{ form.name.value|default:"" }}" required autofocus><br>
-		<input class="form-control btn btn-primary btn-lg ml-2" type="submit" value="Search" name="search">
-		<input class="form-control btn btn-primary btn-lg ml-2" type="submit" value="Clear" name="clear">
+		<input type="text" id="name" class="form-control" placeholder="Name" name="{{form.name.name}}" value="{{ form.name.value|default:"" }}" required autofocus><br>
+		<input class="form-control btn btn-primary btn-md ml-2" type="submit" value="Search" name="search">
+		<input class="form-control btn btn-primary btn-md ml-2" type="submit" value="Clear" name="clear">
 	</form>
-	<table class="table table-responsive table-hover">
+<p align="left">
+    <button type="button" class="btn btn-primary js-add-client" data-url="{% url 'client_add' %}">New Client</button>
+ </p>
+	<table class="table table-responsive table-hover" id="table-client">
 		<thead>
 			<tr>
 				<th scope="col">ID</th>
@@ -36,28 +33,13 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for client in clients %}
-				<tr>
-					<th  scope="row">{{ client.id }}</th>
-					<td>{{ client.name }}</a></td>
-					<td>{{ client.address }}</td>
-					<td>{{ client.mobile }}</td>
-					<td>{{ client.remarks  }}</td>
-					<td><a href="{% url 'credit' client.id  %}">{{ client.credits|default:"" }}</a></td>
-					<td><a href="{% url 'payment' client.id  %}">{{ client.payments|default:"" }}</a></td>
-					<td>{{ client.credits|sub:client.payments|default:"" }}</td>
-					<td>
-						<a href="{% url 'credit_add' client.id %}">Add Credit</a> ,
-						<a href="{% url 'client_edit' client.id  %}">Edit</a> ,
-						<a href="{% url 'client_del' client.id  %}">Delete</a>
-					</td>
-				</tr>
-			{% endfor %}
+			{% include "lendingapp/client_list.html" %}	
 		</tbody>
 	</table>
 	{% include "lendingapp/pagination_snippet.html" with model=clients page=page %}
-	<div class="modal fade" id="modal-book">
+	<div class="modal fade" id="modal-client">
 		<div class="modal-dialog">
       		<div class="modal-content"></div>
     	</div>
+    </div>
 {% endblock %}

@@ -1,19 +1,37 @@
 {% load extras %}
 {% load static %}
-{% for client in clients %}
-	<tr>
-		<th scope="row">{{ client.id }}</th>
-		<td>{{ client.name }}</a></td>
-		<td>{{ client.address }}</td>
-		<td>{{ client.mobile }}</td>
-		<td>{{ client.remarks  }}</td>
-		<td><a href="{% url 'credit' client.id  %}">{{ client.credits|default:"" }}</a></td>
-		<td><a href="{% url 'payment' client.id  %}">{{ client.payments|default:"" }}</a></td>
-		<td>{{ client.credits|sub:client.payments|default:"" }}</td>
-		<td>
-			<button type="button" class="btn btn-primary btn-sm js-add-credit">Add Credit</button>
-			<button type="button" class="btn btn-primary btn-sm js-edit-client">Edit</button>
-			<button type="button" class="btn btn-primary btn-sm js-del-client" data-url="{% url 'client_del' client.id %}">Del</button>
-		</td>
-	</tr>
-{% endfor %}
+<table class="table table-responsive table-hover" id="table-client">
+	<thead>
+		<tr>
+			<th scope="col">ID</th>
+			<th scope="col">NAME</th>
+			<th scope="col">ADDRESS</th>
+			<th scope="col">MOBILE</th>
+			<th scope="col">REMARKS</th>
+			<th scope="col">CREDITS</th>
+			<th scope="col">PAYMENTS</th>
+			<th scope="col">BALANCE</th>
+			<th scope="col">ACTIONS</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for client in clients %}
+			<tr>
+				<th scope="row">{{ client.id }}</th>
+				<td>{{ client.name }}</a></td>
+				<td>{{ client.address }}</td>
+				<td>{{ client.mobile }}</td>
+				<td>{{ client.remarks  }}</td>
+				<td><a href="{% url 'credit' client.id  %}">{{ client.credits|default:"" }}</a></td>
+				<td><a href="{% url 'payment' client.id  %}">{{ client.payments|default:"" }}</a></td>
+				<td>{{ client.credits|sub:client.payments|default:"" }}</td>
+				<td>
+					<button type="button" class="btn btn-primary btn-sm js-add-credit">Add Credit</button>
+					<button type="button" class="btn btn-primary btn-sm js-edit-client">Edit</button>
+					<a class="btn btn-primary btn-sm" href="{% url 'client_del' client.id %}" >Del</a>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% include "lendingapp/pagination_snippet.html" with model=clients page=page %}

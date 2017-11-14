@@ -19,7 +19,7 @@ $(function () {
 
     var saveForm = function(){
     	var form = $(this);
-    	$ajax({
+    	$.ajax({
     		url: form.attr("action"),
     		data: form.serialize(),
     		type: form.attr("method"),
@@ -27,7 +27,7 @@ $(function () {
     		success: function (data) {
     			if (data.form_is_valid) {
     				$("#table-client tbody").html(data.html_client_list);
-    				location.href = "/lending/client/"
+    				$("modal-client").modal("hide");
     			}
     			else {
     				$("#modal-client .modal-content").html(data.html_form);
@@ -37,19 +37,9 @@ $(function () {
     	return false;
     };
 
-    var delClient = function(){
-    	var btn = $(this);
-    	$ajax({
-    		url: btn.attr("data-url"),
-    		success: location.href = '/lending/client/'
-    	});
-    };
-
     /*Bindings*/
 
 	$(".js-add-client").click(loadForm);
 	$("#modal-client").on("submit",".js-client-form",saveForm);
-
-	$(".js-del-client").click(delClient);
 
 });

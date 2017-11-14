@@ -17,26 +17,8 @@
 	</form>
 <p align="left">
     <button type="button" class="btn btn-primary js-add-client" data-url="{% url 'client_add' %}">New Client</button>
- </p>
-	<table class="table table-responsive table-hover" id="table-client">
-		<thead>
-			<tr>
-				<th scope="col">ID</th>
-				<th scope="col">NAME</th>
-				<th scope="col">ADDRESS</th>
-				<th scope="col">MOBILE</th>
-				<th scope="col">REMARKS</th>
-				<th scope="col">CREDITS</th>
-				<th scope="col">PAYMENTS</th>
-				<th scope="col">BALANCE</th>
-				<th scope="col">ACTIONS</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% include "lendingapp/client_list.html" %}	
-		</tbody>
-	</table>
-	{% include "lendingapp/pagination_snippet.html" with model=clients page=page %}
+</p>
+{% include "lendingapp/client_list.html" %}
 	<div class="modal fade" id="modal-client">
 		<div class="modal-dialog">
       		<div class="modal-content"></div>

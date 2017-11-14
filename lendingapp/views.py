@@ -27,6 +27,13 @@ def paginators(request,obj):
 
 	return {'obj_list':obj_list,'page':page}
 
+def client_list():
+	credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
+	sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
+	clients = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
+	return clients
+
+
 ##############INDEX#########################
 @login_required
 def index(request):
@@ -70,10 +77,7 @@ def client_add(request):
 		if form.is_valid():
 			form.save()
 			data['form_is_valid'] = True
-			credits = models.Credit.objects.filter(clientfk=OuterRef('pk')).values('clientfk')
-			sum_credits = credits.annotate(credits=Sum('amount')).values('credits')
-			client_list = models.Client.objects.annotate(credits=Subquery(sum_credits)).prefetch_related('payment_set').annotate(payments=Sum('payment__amount'))
-			clients = paginators(request,client_list)
+			clients = paginators(request,client_list())
 			data['html_client_list'] = render_to_string('lendingapp/client_list.html',{'clients':clients['obj_list'], 'page':int(clients['page'])})
 		else:
 			data['form_is_valid'] = False
@@ -100,7 +104,7 @@ def client_del(request,id):
 		client.delete()
 		messages.success(request,'Client deleted successfully!')
 	else:
-		messages.warning(request,'Cannot be deleted, Credits(s) available!')	
+		messages.warning(request,'Cannot be deleted, Credits(s) available!')
 	return HttpResponseRedirect(reverse('client'))
 
 ##############CREDIT#########################
